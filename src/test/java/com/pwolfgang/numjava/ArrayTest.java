@@ -96,4 +96,44 @@ public class ArrayTest {
         }
     }
     
+    @Test
+    public void testTranspose() {
+        int[][] data = new int[][]
+        {{1, 2, 3, 4},
+         {5, 6, 7, 8}};
+        Array anArray = new Array(data);
+        Array anArrayT = anArray.transpose();
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 2; j++) {
+                assertEquals(data[j][i], anArrayT.getInt(i, j));
+            }
+        }
+    }
+    
+    @Test
+    public void reShape2dto1d() {
+        int[][] data = new int[][]
+        {{1, 2, 3, 4},
+         {5, 6, 7, 8}};
+        Array anArray = new Array(data);
+        Array reShaped = anArray.reShape(new int[]{8});
+        for (int i = 0; i < 8; i++) {
+            assertEquals(i+1, reShaped.getInt(i));
+        }
+    }
+
+    @Test
+    public void reShape1dto2d() {
+        int[][] data = new int[][]
+        {{1, 2, 3, 4},
+         {5, 6, 7, 8}};
+        Array anArray = new Array(new int[]{1, 2, 3, 4, 5, 6, 7, 8});
+        Array reShaped = anArray.reShape(new int[]{2, 4});
+        for (int i = 0; i < 2; i++) {
+            for (int j = 0; j < 4; j++) {
+                assertEquals(data[i][j], reShaped.getInt(i, j));
+            }
+        }
+    }
+    
 }

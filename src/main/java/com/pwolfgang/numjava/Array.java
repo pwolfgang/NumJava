@@ -28,6 +28,7 @@ public class Array {
     
     private final int[] shape;
     private final int[] stride;
+    private final int numDim;
     private final Class<?> dataType;
     private final int offset;
     final Object data;
@@ -40,6 +41,7 @@ public class Array {
      */
     private Array(int[] shape, int[] stride, Class<?> dataType, int offset, Object data) {
         this.shape = shape;
+        this.numDim = shape.length;
         this.stride = stride;
         this.dataType = dataType;
         this.offset = offset;
@@ -71,7 +73,7 @@ public class Array {
         if (!componentType.isPrimitive()) {
             throw new IllegalArgumentException(componentType + " is not a primitive type");
         }
-        int numDim = sizes.size();
+        numDim = sizes.size();
         shape = new int[numDim];
         for (int i = 0; i < sizes.size(); i++) {
             shape[i] = sizes.get(i);
@@ -104,7 +106,6 @@ public class Array {
             int length = java.lang.reflect.Array.getLength(data);
             for (int i = 0; i < length; i++) {
                 Object level = java.lang.reflect.Array.get(data, i);
-                int levelLength = java.lang.reflect.Array.getLength(level);
                 index = copyData(level, index);
             }
             return index;
@@ -147,7 +148,7 @@ public class Array {
      * @throws ClassCastException if the dataType is not int.
      */
     public int getInt(int... idx) {
-        if (idx.length != shape.length) {
+        if (idx.length != numDim) {
             throw new IllegalArgumentException("Indices must match shape to get signle element");
         }
         int index = computeIndex(idx);
@@ -161,7 +162,7 @@ public class Array {
      * @throws ClassCastException if the dataType is not float.
      */
     public float getFloat(int... idx) {
-        if (idx.length != shape.length) {
+        if (idx.length != numDim) {
             throw new IllegalArgumentException("Indices must match shape to get signle element");
         }
         int index = computeIndex(idx);
@@ -175,7 +176,7 @@ public class Array {
      * @throws IllegalArgumentException if there are more indices than shapes.
      */
     private int computeIndex(int[] idx) throws IllegalArgumentException {
-        if (idx.length > shape.length) {
+        if (idx.length > numDim) {
             throw new IllegalArgumentException("Too many indices: " 
                     + Arrays.asList(idx).toString()
                     + " shape: " + Arrays.asList(shape).toString());
@@ -194,13 +195,13 @@ public class Array {
      * @throws IllegalArgumentException if the number of indices does not address a slice.
      */
     public Array getSubArray(int ...idx) {
-        if (idx.length > shape.length-1) {
+        if (idx.length > numDim-1) {
             throw new IllegalArgumentException("Too many indices");
         }
-        int[] idxPrime = new int[shape.length];
+        int[] idxPrime = new int[numDim];
         System.arraycopy(idx, 0, idxPrime, 0, idx.length);
         int newOffset = computeIndex(idxPrime);
-        int deltaIndices = shape.length - idx.length;
+        int deltaIndices = numDim - idx.length;
         int[] newShape = new int[deltaIndices];
         int[] newStride = new int[deltaIndices];
         for (int i = 0; i < deltaIndices; i++) {
@@ -213,6 +214,42 @@ public class Array {
         }
         Object newData = java.lang.reflect.Array.newInstance(dataType, totalSize);
         return new Array(newShape, newStride, dataType, newOffset, data);
+    }
+    
+    /**
+     * Return a transpose of this array.
+     * @return A transpose of this array.
+     */
+    public Array transpose() {
+        if (numDim < 2) return this;
+        int[] newShape = new int[numDim];
+        int[] newStride = new int[numDim];
+        for (int i = 0; i < numDim; i++) {
+            newShape[i] = shape[numDim - i - 1];
+            newStride[i] = stride[numDim - i - 1];
+        }
+        return new Array(newShape, newStride, dataType, offset, data);
+    }
+    
+    /**
+     * Return a re-shaped view of this array. 
+     * @param newShape The new shape.
+     * @return a reshaped view.
+     * @throws IllegalArgumentException if this is a transposed Array.
+     */
+    public Array reShape(int[] newShape) {
+        int newNumDim = newShape.length;
+        int[] newStride = new int[newNumDim];
+        newStride[newNumDim-1] = 1;
+        for (int i = newNumDim-2; i >= 0; i--) {
+            newStride[i] = newStride[i+1] * newShape[i+1];
+        }
+        if (stride[numDim-1] == 1) { //do not need to make copy
+            return new Array(newShape, newStride, dataType, offset, data);
+        } else {
+            throw new IllegalArgumentException("Cannot reshape a transposed array");
+        }
+        
     }
     
 }
