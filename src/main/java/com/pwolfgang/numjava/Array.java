@@ -30,7 +30,13 @@ public class Array {
     private Class<?> dataType;
     Object data;
     
-    public Array(int[] shape, Class<?> dataType, Object data) {
+    /**
+     * Create an Array object. This constructor is only to be used internally.
+     * @param shape The shape (a java array of ints.)
+     * @param dataType The data type (primitive java class object)
+     * @param data A single dimension array of data values.
+     */
+    private Array(int[] shape, Class<?> dataType, Object data) {
         this.shape = shape;
         this.dataType = dataType;
         this.data = data;
@@ -75,6 +81,12 @@ public class Array {
         
     }
     
+    /**
+     * Method to copy a sub-array (slice) from this data array to another.
+     * @param data The destination data array.
+     * @param index The start index in this data array
+     * @return Updated value of index.
+     */
     private int copyData(Object data, int index) {
         if (data.getClass().getComponentType().isPrimitive()) {
             return copyRow(this.data, data, index);
@@ -89,23 +101,41 @@ public class Array {
         }
     }
     
+    /**
+     * Method to copy the actual single-dimension row segment.
+     * @param data The source array.
+     * @param row The destination array.
+     * @param index The start index in the source
+     * @return updated value of source.
+     */
     private int copyRow(Object data, Object row, int index) {
         int rowSize = java.lang.reflect.Array.getLength(row);
-        for (int i = 0; i < rowSize; i++) {
-            java.lang.reflect.Array.set(data, index, java.lang.reflect.Array.get(row, i));
-            index++;
-        }
-        return index;
+        System.arraycopy(row, 0, data, index, rowSize);
+        return index + rowSize;
     }
     
+    /**
+     * Return the shape.
+     * @return the shape.
+     */
     public int[] getShape() {
         return shape;
     }
     
+    /**
+     * Return the dataType
+     * @return the dataType
+     */
     public Class<?> getDataType() {
         return dataType;
     }
     
+    /**
+     * Get an int value from the array. 
+     * @param idx The index.
+     * @return The value at this index
+     * @throws ClassCastException if the dataType is not int.
+     */
     public int getInt(int... idx) {
         if (idx.length != shape.length) {
             throw new IllegalArgumentException("Indices must match shape to get signle element");
@@ -114,6 +144,12 @@ public class Array {
         return ((int[])data)[index];
     }
     
+    /**
+     * Get a float value from the array. 
+     * @param idx The index.
+     * @return The value at this index
+     * @throws ClassCastException if the dataType is not float.
+     */
     public float getFloat(int... idx) {
         if (idx.length != shape.length) {
             throw new IllegalArgumentException("Indices must match shape to get signle element");
@@ -122,6 +158,12 @@ public class Array {
         return ((float[])data)[index];
     }
 
+    /**
+     * Compute the linear offset into the internal data array.
+     * @param idx The index array
+     * @return The index to the data array
+     * @throws IllegalArgumentException if there are more indices than shapes.
+     */
     private int computeIndex(int[] idx) throws IllegalArgumentException {
         if (idx.length > shape.length) {
             throw new IllegalArgumentException("Too many indices: " 
@@ -137,6 +179,12 @@ public class Array {
         return index;
     }
     
+    /**
+     * Get a sub-array (slice) 
+     * @param idx the index array
+     * @return A new Array object containing the sub-array
+     * @throws IllegalArgumentException if the number of indices does not address a slice.
+     */
     public Array getSubArray(int ...idx) {
         if (idx.length > shape.length-1) {
             throw new IllegalArgumentException("Too many indices");
