@@ -85,9 +85,15 @@ public class ArrayTest {
         assertEquals(2314, anArray.getInt(1, 2, 0, 3));
         Array subArray = anArray.getSubArray(1, 2);
         assertArrayEquals(new int[]{2, 4}, subArray.getShape());
-        assertArrayEquals(new int[]
+        int k = 0;
+        int[] expected = new int[]
            {2311, 2312, 2313, 2314, 
-            2321, 2322, 2323, 2324}, (int[])subArray.data);
+            2321, 2322, 2323, 2324};
+        for (int i = 0; i < 2; i++) {
+            for (int j = 0; j < 4; j++) {
+                assertEquals(expected[k++], subArray.getInt(i, j));
+            }
+        }
     }
     
 }

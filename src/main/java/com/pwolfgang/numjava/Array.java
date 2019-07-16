@@ -26,9 +26,10 @@ import java.util.List;
  */
 public class Array {
     
-    private int[] shape;
-    private Class<?> dataType;
-    Object data;
+    private final int[] shape;
+    private final Class<?> dataType;
+    private final int offset;
+    final Object data;
     
     /**
      * Create an Array object. This constructor is only to be used internally.
@@ -36,9 +37,10 @@ public class Array {
      * @param dataType The data type (primitive java class object)
      * @param data A single dimension array of data values.
      */
-    private Array(int[] shape, Class<?> dataType, Object data) {
+    private Array(int[] shape, Class<?> dataType, int offset, Object data) {
         this.shape = shape;
         this.dataType = dataType;
+        this.offset = offset;
         this.data = data;
     }
     
@@ -77,12 +79,12 @@ public class Array {
             totalSize *= d;
         }
         this.data = java.lang.reflect.Array.newInstance(dataType, totalSize);
-        copyData(data, 0);
-        
+        offset = 0;
+        copyData(data, 0);      
     }
     
     /**
-     * Method to copy a sub-array (slice) from this data array to another.
+     * Method to a row (may be multidimensional) from a Java array to the data array.
      * @param data The destination data array.
      * @param index The start index in this data array
      * @return Updated value of index.
@@ -176,7 +178,7 @@ public class Array {
             index *= shape[i+1];
         }
         index += idx[idx.length-1];
-        return index;
+        return index + offset;
     }
     
     /**
@@ -191,7 +193,7 @@ public class Array {
         }
         int[] idxPrime = new int[shape.length];
         System.arraycopy(idx, 0, idxPrime, 0, idx.length);
-        int index = computeIndex(idxPrime);
+        int offset = computeIndex(idxPrime);
         int deltaIndices = shape.length - idx.length;
         int[] newShape = new int[deltaIndices];
         for (int i = 0; i < deltaIndices; i++) {
@@ -202,8 +204,7 @@ public class Array {
             totalSize *= d;
         }
         Object newData = java.lang.reflect.Array.newInstance(dataType, totalSize);
-        System.arraycopy(data, index, newData, 0, totalSize);
-        return new Array(newShape, dataType, newData);
+        return new Array(newShape, dataType, offset, data);
     }
     
 }
