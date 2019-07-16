@@ -136,4 +136,11 @@ public class ArrayTest {
         }
     }
     
+    @Test
+    public void constructSingleton() {
+        Array anArray = new Array(10);
+        assertEquals(Integer.class, anArray.getDataType());
+        assertEquals(10, anArray.getInt(0));
+    }
+    
 }
