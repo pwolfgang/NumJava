@@ -193,7 +193,7 @@ public class Array {
         }
         int[] idxPrime = new int[shape.length];
         System.arraycopy(idx, 0, idxPrime, 0, idx.length);
-        int offset = computeIndex(idxPrime);
+        int newOffset = computeIndex(idxPrime);
         int deltaIndices = shape.length - idx.length;
         int[] newShape = new int[deltaIndices];
         for (int i = 0; i < deltaIndices; i++) {
@@ -204,7 +204,7 @@ public class Array {
             totalSize *= d;
         }
         Object newData = java.lang.reflect.Array.newInstance(dataType, totalSize);
-        return new Array(newShape, dataType, offset, data);
+        return new Array(newShape, dataType, newOffset, data);
     }
     
 }
