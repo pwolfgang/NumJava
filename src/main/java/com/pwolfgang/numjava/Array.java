@@ -27,6 +27,7 @@ import java.util.List;
 public class Array {
     
     private final int[] shape;
+    private final int[] stride;
     private final Class<?> dataType;
     private final int offset;
     final Object data;
@@ -37,8 +38,9 @@ public class Array {
      * @param dataType The data type (primitive java class object)
      * @param data A single dimension array of data values.
      */
-    private Array(int[] shape, Class<?> dataType, int offset, Object data) {
+    private Array(int[] shape, int[] stride, Class<?> dataType, int offset, Object data) {
         this.shape = shape;
+        this.stride = stride;
         this.dataType = dataType;
         this.offset = offset;
         this.data = data;
@@ -69,9 +71,15 @@ public class Array {
         if (!componentType.isPrimitive()) {
             throw new IllegalArgumentException(componentType + " is not a primitive type");
         }
-        shape = new int[sizes.size()];
+        int numDim = sizes.size();
+        shape = new int[numDim];
         for (int i = 0; i < sizes.size(); i++) {
             shape[i] = sizes.get(i);
+        }
+        stride = new int[numDim];
+        stride[numDim-1] = 1;
+        for (int i = numDim-2; i >= 0; i--) {
+            stride[i] = stride[i+1] * shape[i+1];
         }
         dataType = componentType;
         int totalSize = 1;
@@ -173,11 +181,9 @@ public class Array {
                     + " shape: " + Arrays.asList(shape).toString());
         }
         int index = 0;
-        for (int i = 0; i < idx.length - 1; i++) {
-            index += idx[i];
-            index *= shape[i+1];
+        for (int i = 0; i < idx.length; i++) {
+            index += stride[i] * idx[i];
         }
-        index += idx[idx.length-1];
         return index + offset;
     }
     
@@ -196,15 +202,17 @@ public class Array {
         int newOffset = computeIndex(idxPrime);
         int deltaIndices = shape.length - idx.length;
         int[] newShape = new int[deltaIndices];
+        int[] newStride = new int[deltaIndices];
         for (int i = 0; i < deltaIndices; i++) {
             newShape[i] = shape[idx.length + i];
+            newStride[i] = stride[idx.length + i];
         }
         int totalSize = 1;
         for (int d : newShape) {
             totalSize *= d;
         }
         Object newData = java.lang.reflect.Array.newInstance(dataType, totalSize);
-        return new Array(newShape, dataType, newOffset, data);
+        return new Array(newShape, newStride, dataType, newOffset, data);
     }
     
 }
