@@ -17,6 +17,7 @@
 package com.pwolfgang.numjava;
 
 import java.util.Arrays;
+import java.util.PrimitiveIterator;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -143,4 +144,45 @@ public class ArrayTest {
         assertEquals(10, anArray.getInt(0));
     }
     
+    @Test
+    public void iteratorOverSingleton() {
+        Array anArray = new Array(10);
+        PrimitiveIterator.OfDouble itr = anArray.iterator();
+        assertTrue(itr.hasNext());
+        assertEquals(10.0, itr.nextDouble(), 1e-18);
+        assertFalse(itr.hasNext());
+    }
+    
+    @Test
+    public void rowIteratorOverTwoDimArrayOfFloat() {
+        float[][] twoDFloat = new float[][] 
+            {{1.0f, 2.0f, 3.0f, 4.0f},
+             {5.0f, 6.0f, 7.0f, 8.0f},
+             {10.0f, 11.0f, 12.0f, 13.0f}};
+        Array anArray = new Array(twoDFloat);
+        Array secondRow = anArray.getSubArray(1);
+        PrimitiveIterator.OfDouble itr = secondRow.iterator();
+        assertTrue(itr.hasNext());
+        assertEquals(5.0, itr.next(), 1e-18);
+        assertEquals(6.0, itr.next(), 1e-18);
+        assertEquals(7.0, itr.next(), 1e-18);
+        assertEquals(8.0, itr.next(), 1e-18);
+        assertFalse(itr.hasNext());
+    }
+
+    @Test
+    public void colIteratorOverTwoDimArrayOfFloat() {
+        float[][] twoDFloat = new float[][] 
+            {{1.0f, 2.0f, 3.0f, 4.0f},
+             {5.0f, 6.0f, 7.0f, 8.0f},
+             {10.0f, 11.0f, 12.0f, 13.0f}};
+        Array anArray = new Array(twoDFloat);
+        Array secondCol = anArray.transpose().getSubArray(1);
+        PrimitiveIterator.OfDouble itr = secondCol.iterator();
+        assertTrue(itr.hasNext());
+        assertEquals(2.0, itr.next(), 1e-18);
+        assertEquals(6.0, itr.next(), 1e-18);
+        assertEquals(11.0, itr.next(), 1e-18);
+        assertFalse(itr.hasNext());
+    }
 }

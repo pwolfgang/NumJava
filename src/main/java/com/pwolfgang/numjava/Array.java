@@ -19,6 +19,9 @@ package com.pwolfgang.numjava;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Objects;
+import java.util.PrimitiveIterator;
 
 /**
  * This class is similar to the NumPY ndarray.
@@ -241,7 +244,6 @@ public class Array {
         for (int d : newShape) {
             totalSize *= d;
         }
-        Object newData = java.lang.reflect.Array.newInstance(dataType, totalSize);
         return new Array(newShape, newStride, dataType, newOffset, data);
     }
 
@@ -282,7 +284,158 @@ public class Array {
         } else {
             throw new IllegalArgumentException("Cannot reshape a transposed array");
         }
-
+    }
+    
+    /**
+     * Compute the dot product of this and other.
+     * If this and other are one-dim, result is the inner-product.
+     * If this and other are two-dim, result is matrix multiply.
+     * If this or other are singletons, then result multiplying the singleton
+     * by each member of the non-singleton.
+     * If this is an n-dim array and other is a one-dim array, it is the
+     * sum product over the last axis of this and other.
+     * @param other
+     * @return 
+     */
+    public Array dot(Array other) {
+        if (shape.length == 1 && other.shape.length == 1) {
+            return innerProduct(this, other);
+        }
+        return null;
+    }
+    
+    private static Array innerProduct(Array left, Array right) {
+        return null;
+    }
+    
+    @Override
+    public String toString() {
+        return String.format("Shape: %s%nStride: %s%nOffset: %s%nDataType: %s%nData: %s%n",
+                Arrays.toString(shape), Arrays.toString(stride), offset, 
+                dataType.toString(), Objects.toString(data));
+    }
+    
+    
+    /**
+     * Return a PrimitiveIterator.OfDouble. If this is a
+     * singleton, then the returned iterator::next method will return the value
+     * cast as a double. If this is a single-dimension array, the iterator will 
+     * iterate through the elements, casting them as a double. 
+     * @return PrimitiveIterator.OfDouble
+     * @throws IllegalArgumentException if there are more than 1 dimension
+     */
+    public PrimitiveIterator.OfDouble iterator() {
+        if (numDim == 0) {
+            return new SingletonIterator(this);
+        }
+        if (numDim != 1) {
+            throw new IllegalArgumentException("Can only iterate over singelton or single-dim array");
+        }
+        if (dataType == int.class) {
+            return new IteratorOverInt(this);
+        }
+        if (dataType == float.class) {
+            return new IteratorOverFloat(this);
+        }
+        throw new IllegalArgumentException("Only arrays of int or float are supported");
+    }
+    
+    private static class SingletonIterator implements PrimitiveIterator.OfDouble {
+        
+        private boolean nextCalled;
+        private final Number data;
+        
+        public SingletonIterator(Array array) {
+            nextCalled = false;
+            data = (Number) array.data;
+        }
+        
+        @Override
+        public boolean hasNext() {
+            return !nextCalled;
+        }
+        
+        @Override
+        public double nextDouble() {
+            if (!hasNext()) {
+                throw new NoSuchElementException();
+            }
+            nextCalled = true;
+            return data.doubleValue();
+        }
+        
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
+    }
+    
+    private static class IteratorOverInt implements PrimitiveIterator.OfDouble {
+        
+        private final int stride;
+        private final int lastIndex;
+        private int index;
+        private final int[] data;
+    
+        public IteratorOverInt(Array array) {
+            this.stride = array.stride[0];
+            this.index = array.offset;
+            this.lastIndex = index + stride * array.shape[0];
+            this.data = (int[])array.data;
+        }
+        
+        @Override
+        public boolean hasNext() {
+            return index < lastIndex;
+        }
+        
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
+        
+        @Override
+        public double nextDouble() {
+            if (!hasNext()) {
+                throw new NoSuchElementException();
+            }
+            double value = (double)data[index];
+            index += stride;
+            return value;
+        }
     }
 
+    private static class IteratorOverFloat implements PrimitiveIterator.OfDouble {
+        
+        private final int stride;
+        private final int lastIndex;
+        private int index;
+        private final float[] data;
+    
+        public IteratorOverFloat(Array array) {
+            this.stride = array.stride[0];
+            this.index = array.offset;
+            this.lastIndex =  index + stride * array.shape[0];
+            this.data = (float[])array.data;
+        }
+        
+        @Override
+        public boolean hasNext() {
+            return index < lastIndex;
+        }
+        
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
+        
+        @Override
+        public double nextDouble() {
+            double value = (double)data[index];
+            index += stride;
+            return value;
+        }
+    }
 }
+    
+
