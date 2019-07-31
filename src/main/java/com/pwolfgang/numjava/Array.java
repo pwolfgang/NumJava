@@ -403,7 +403,7 @@ public class Array {
         if (other.numDim == 1) {
             return nDtimes1D(this, other);
         }
-        return null;
+        return nDtimesMd(this, other);
     }
     
     static Array nDtimes1D(Array a, Array b) {
@@ -414,7 +414,13 @@ public class Array {
                     Arrays.toString(a.shape), Arrays.toString(b.shape)));
         }
         int[] resultShape = Arrays.copyOf(a.shape, aNumDim-1);
-        Object result = java.lang.reflect.Array.newInstance(a.dataType, resultShape);
+        Class<?> resultDataType;
+        if (a.dataType == int.class && b.dataType == int.class) {
+            resultDataType = int.class;
+        } else {
+            resultDataType = float.class;
+        }
+        Object result = java.lang.reflect.Array.newInstance(resultDataType, resultShape);
         Array resultArray = new Array(result);
         IndexIterator itr = new IndexIterator(resultShape);
         while (itr.hasNext()) {
@@ -423,6 +429,55 @@ public class Array {
             resultArray.set((Number)x.data, idx);
         }
         return resultArray;
+    }
+    
+    static Array nDtimesMd(Array a, Array b) {
+        int aNumDim = a.numDim;
+        int bNumDim = b.numDim;
+        int aVlength = a.shape[aNumDim-1];
+        int bVlength = b.shape[bNumDim-1];
+        if (aVlength != bVlength) {
+            throw new IllegalArgumentException(
+            String.format("shapes %s and %s not alligned",
+                    Arrays.toString(a.shape), Arrays.toString(b.shape)));
+        }
+        int[] aSubShape = Arrays.copyOf(a.shape, aNumDim-1);
+        int[] bSubShape = new int[bNumDim-1];
+        System.arraycopy(b.shape, 0, bSubShape, 0, bNumDim-1);
+        bSubShape[bNumDim-2] = b.shape[bNumDim-1];
+        int[] resultShape = new int[aNumDim + bNumDim - 2];
+        System.arraycopy(aSubShape, 0, resultShape, 0, aNumDim-1);
+        System.arraycopy(bSubShape, 0, resultShape, aNumDim-1, bNumDim-1);
+        Class<?> resultDataType;
+        if (a.dataType == int.class && b.dataType == int.class) {
+            resultDataType = int.class;
+        } else {
+            resultDataType = float.class;
+        }
+        Object result = java.lang.reflect.Array.newInstance(resultDataType, resultShape);
+        Array resultArray = new Array(result);
+        IndexIterator itrA = new IndexIterator(aSubShape);
+        while (itrA.hasNext()) {
+            int[] idxA = itrA.next();
+            Array row = a.getSubArray(idxA);
+            IndexIterator itrB = new IndexIterator(bSubShape);
+            while (itrB.hasNext()) {
+                int[] idxB = itrB.next();
+                Array col = getSecondToLast(b, idxB);
+                int[] idxC = new int[resultArray.numDim];
+                System.arraycopy(idxA, 0, idxC, 0, idxA.length);
+                System.arraycopy(idxB, 0, idxC, idxA.length, idxB.length);
+                Array x = row.dot(col);
+                resultArray.set((Number)x.data, idxC);
+            }
+        }
+        return resultArray;      
+    }
+    
+    static Array getSecondToLast(Array b, int[] idx) {
+        int[] subIndex = Arrays.copyOf(idx, idx.length-1);
+        int i = idx[idx.length-1];
+        return b.getSubArray(subIndex).transpose().getSubArray(i);
     }
     
     
