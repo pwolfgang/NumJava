@@ -200,7 +200,7 @@ public class ArrayTest {
     }
     
     @Test
-    public void testOfMatrixMul() {
+    public void testOfMatrixMul_2x4_by_4x2() {
         int[][] a = {{1, 2, 3, 4},
             {5, 6, 7, 8}};
         int[][] b = {{9, 10},
@@ -215,5 +215,48 @@ public class ArrayTest {
         Array arrayB = new Array(b);
         Array arrayC = new Array(c);
         assertEquals(arrayC, arrayA.dot(arrayB));
+    }
+
+    @Test
+    public void testOfMatrixMul_2x4_by_4x1() {
+        int[][] a = {{1, 2, 3, 4},
+            {5, 6, 7, 8}};
+        int[][] b = {{9}, {11}, {13}, {15}};
+        
+        int[][] c = {{130}, {322}};
+        
+        Array arrayA = new Array(a);
+        Array arrayB = new Array(b);
+        Array arrayC = new Array(c);
+        Array result = arrayA.dot(arrayB);
+        assertEquals(arrayC, result);
+    }
+
+    @Test
+    public void testOfMatrixMul_2x4_by_one_dim_array() {
+        int[][] a = {{1, 2, 3, 4},
+            {5, 6, 7, 8}};
+        int[] b = {9, 11, 13, 15};
+        
+        int[] c = {130, 322};
+        
+        Array arrayA = new Array(a);
+        Array arrayB = new Array(b);
+        Array arrayC = new Array(c);
+        Array result = arrayA.dot(arrayB);
+        assertEquals(arrayC, result);
+    }
+    
+    @Test
+    public void testOf2x2x4byOneDimArray() {
+        int [][][]a = {{{1, 2, 3, 4}, {5, 6, 7, 8}},{{20, 21, 22, 23}, {24, 24, 26, 27}}};
+        int[] b = {9, 11, 13, 15};
+        int[][] c = {{130, 322}, {1042, 1223}};
+        Array arrayA = new Array(a);
+        Array arrayB = new Array(b);
+        Array arrayC = new Array(c);
+        Array result = arrayA.dot(arrayB);
+        assertEquals(arrayC, result);
+
     }
 }

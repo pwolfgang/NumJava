@@ -400,8 +400,31 @@ public class Array {
             }
             return mmul(this, other);
         }
+        if (other.numDim == 1) {
+            return nDtimes1D(this, other);
+        }
         return null;
     }
+    
+    static Array nDtimes1D(Array a, Array b) {
+        int aNumDim = a.numDim;
+        if (a.shape[aNumDim-1] != b.shape[0]) {
+            throw new IllegalArgumentException(
+            String.format("shapes %s and %s not alligned",
+                    Arrays.toString(a.shape), Arrays.toString(b.shape)));
+        }
+        int[] resultShape = Arrays.copyOf(a.shape, aNumDim-1);
+        Object result = java.lang.reflect.Array.newInstance(a.dataType, resultShape);
+        Array resultArray = new Array(result);
+        IndexIterator itr = new IndexIterator(resultShape);
+        while (itr.hasNext()) {
+            int[] idx = itr.next();
+            Array x = a.getSubArray(idx).dot(b);
+            resultArray.set((Number)x.data, idx);
+        }
+        return resultArray;
+    }
+    
     
     static Array mmul(Array a, Array b) {
         int[] resultShape = new int[2];
