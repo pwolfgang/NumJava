@@ -35,7 +35,7 @@ public class Array {
     private final int numDim;
     private final Class<?> dataType;
     private final int offset;
-    final Object data;
+    Object data;
 
     /**
      * Create an Array object. This constructor is only to be used internally.
@@ -197,6 +197,30 @@ public class Array {
         int index = computeIndex(idx);
         return ((float[]) data)[index];
     }
+    
+    /**
+     * Store a value in the array.
+     * 
+     * @param x The value to be stored
+     * @param idx The index.
+     * @return The modified array with the value set.
+     */
+    public Array set(Number x, int... idx) {
+        if (numDim == 0) {
+            data = x;
+            return this;
+        }
+        if (idx.length != numDim) {
+            throw new IllegalArgumentException("Indices must match shape to get signle element");
+        }
+        int index = computeIndex(idx);
+        if (dataType == int.class) {
+            ((int[])data)[index] = x.intValue();
+        } else {
+            ((float[])data)[index] = x.floatValue();
+        }
+        return this;
+    }
 
     /**
      * Compute the linear offset into the internal data array.
@@ -214,6 +238,14 @@ public class Array {
         int index = 0;
         for (int i = 0; i < idx.length; i++) {
             index += stride[i] * idx[i];
+        }
+        return index + offset;
+    }
+    
+    private int computeLastIndex() {
+        int index = 0;
+        for (int i = 0; i < shape.length; i++) {
+            index += stride[i] * (shape[i] - 1);
         }
         return index + offset;
     }
@@ -273,17 +305,70 @@ public class Array {
      * @throws IllegalArgumentException if this is a transposed Array.
      */
     public Array reShape(int[] newShape) {
+        if (stride[numDim - 1]!= 1) {
+            throw new IllegalArgumentException("Cannot reshape a transposed array");            
+        }
         int newNumDim = newShape.length;
         int[] newStride = new int[newNumDim];
         newStride[newNumDim - 1] = 1;
         for (int i = newNumDim - 2; i >= 0; i--) {
             newStride[i] = newStride[i + 1] * newShape[i + 1];
         }
-        if (stride[numDim - 1] == 1) { //do not need to make copy
-            return new Array(newShape, newStride, dataType, offset, data);
+        return new Array(newShape, newStride, dataType, offset, data);
+    }
+    
+    /**
+     * Multiply each member by a scalar value.
+     * @param s The scalar value
+     * @return A new Array with each element multiplied by the scalar value.
+     */
+    public Array mul(Number s) {
+        if (numDim == 0) {
+            return numProduct((Number) data, s);
+        } if (dataType == int.class) {
+            if (s instanceof Integer) {
+                return intTimesInt((int[]) data, s.intValue());
+            } else {
+                return intTimesFloat((int[]) data, s.floatValue());
+            }
         } else {
-            throw new IllegalArgumentException("Cannot reshape a transposed array");
+            return floatTimesFloat((float[]) data, s.floatValue());
         }
+    }
+    
+    private static Array numProduct(Number x, Number y) {
+        if (x instanceof Integer && y instanceof Integer) {
+            return new Array(x.intValue() * y.intValue());
+        } else {
+            return new Array(x.floatValue() * y.floatValue());
+        }
+    }
+    
+    private static Array intTimesInt(int[] x, int s) {
+        int len = x.length;
+        int[] result = new int[len];
+        for (int i = 0; i < len; i++) {
+            result[i] = x[i] * s;
+        }
+        return new Array(result);
+    }
+
+    private static Array intTimesFloat(int[] x, float s) {
+        int len = x.length;
+        int[] result = new int[len];
+        for (int i = 0; i < len; i++) {
+            result[i] = (int)(x[i] * s);
+        }
+        return new Array(result);
+    }
+
+    private static Array floatTimesFloat(float[] x, float s) {
+        int len = x.length;
+        float[] result = new float[len];
+        for (int i = 0; i < len; i++) {
+            result[i] = x[i] * s;
+        }
+        return new Array(result);
     }
     
     /**
@@ -298,14 +383,65 @@ public class Array {
      * @return 
      */
     public Array dot(Array other) {
+        if (numDim == 0) {
+            return other.mul((Number) data);
+        }
+        if (other.numDim == 0) {
+            return mul((Number)other.data);
+        }
         if (shape.length == 1 && other.shape.length == 1) {
             return innerProduct(this, other);
+        }
+        if (numDim == 2 && other.numDim == 2) {
+            if (shape[1] != other.shape[0]) {
+                throw new IllegalArgumentException(
+                        String.format("Cannot multiply %s array by %s array", 
+                                Arrays.toString(shape), Arrays.toString(other.shape)));
+            }
+            return mmul(this, other);
         }
         return null;
     }
     
+    static Array mmul(Array a, Array b) {
+        int[] resultShape = new int[2];
+        resultShape[0] = a.shape[0];
+        resultShape[1] = b.shape[1];
+        Object result;
+        if (a.dataType == int.class && b.dataType == int.class) {
+            result = new int[resultShape[0]][resultShape[1]];
+        } else {
+            result = new float[resultShape[0]][resultShape[1]];
+        }
+        Array resultArray = new Array(result);
+        for (int i = 0; i < resultShape[0]; i++) {
+            for (int j = 0; j < resultShape[1]; j++) {
+                Array aRow = a.getSubArray(i);
+                Array bCol = b.transpose().getSubArray(j);
+                Array p = aRow.dot(bCol);
+                resultArray.set((Number)p.data, i, j);
+            }
+        }
+        return resultArray;    
+    }
+    
     private static Array innerProduct(Array left, Array right) {
-        return null;
+        if (left.shape[0] != right.shape[0]) {
+            throw new IllegalArgumentException("Arrays must be the same size");
+        }
+        double result = 0;
+        PrimitiveIterator.OfDouble leftItr = left.iterator();
+        PrimitiveIterator.OfDouble rightItr = right.iterator();
+        while (leftItr.hasNext()) {
+            double leftValue = leftItr.nextDouble();
+            double rightValue = rightItr.nextDouble();
+            result += leftValue * rightValue;
+        }
+        if (left.dataType == int.class && right.dataType == int.class) {
+            return new Array((int)result);
+        } else {
+            return new Array((float)result);
+        }
     }
     
     @Override
@@ -313,6 +449,56 @@ public class Array {
         return String.format("Shape: %s%nStride: %s%nOffset: %s%nDataType: %s%nData: %s%n",
                 Arrays.toString(shape), Arrays.toString(stride), offset, 
                 dataType.toString(), Objects.toString(data));
+    }
+    
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null) return false;
+        if (this.getClass() == o.getClass()) {
+            Array other = (Array)o;
+            if (this.dataType != other.dataType) return false;
+            if (!Arrays.equals(this.shape, other.shape)) return false;
+            if (!Arrays.equals(this.stride, other.stride)) return false;
+            if (numDim == 0) {
+                return this.data.equals(other.data);
+            }
+            int lastIndexLeft = this.computeLastIndex();
+            int lastIndexRight = other.computeLastIndex();
+            int firstIndexLeft = this.offset;
+            int firstIndexRight = other.offset;
+            if (dataType == int.class) {
+                return equalInts((int[])this.data, firstIndexLeft, lastIndexLeft,
+                        (int[])other.data, firstIndexRight, lastIndexRight);
+            } else if (dataType == float.class) {
+                return equalFloats((float[])this.data, firstIndexLeft, lastIndexLeft,
+                        (float[])other.data, firstIndexRight, lastIndexRight);
+            } else {
+                throw new RuntimeException("Unrecognized datatype");
+            }
+        } else {
+            return false;
+        }
+    }
+    
+    private boolean equalInts(int[] left, int indexLeft, int lastIndexLeft,
+            int[] right, int indexRight, int lastIndexRight) {
+            while(indexLeft < lastIndexLeft && indexRight < lastIndexRight) {
+                if (left[indexLeft++] != right[indexRight++]) {
+                    return false;
+                }
+            }
+            return true;
+    }
+
+    private boolean equalFloats(float[] left, int indexLeft, int lastIndexLeft,
+            float[] right, int indexRight, int lastIndexRight) {
+            while(indexLeft < lastIndexLeft && indexRight < lastIndexRight) {
+                if (left[indexLeft++] != right[indexRight++]) {
+                    return false;
+                }
+            }
+            return true;
     }
     
     

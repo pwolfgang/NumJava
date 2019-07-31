@@ -41,17 +41,22 @@ public class ArrayTest {
     
     @Test
     public void constructTwoDimArrayOfFloat() {
-        float[][] twoDFloat = new float[][] 
-            {{1.0f, 2.0f, 3.0f, 4.0f},
-             {5.0f, 6.0f, 7.0f, 8.0f},
-             {10.0f, 11.0f, 12.0f, 13.0f}};
-        Array anArray = new Array(twoDFloat);
+        Array anArray = createTwoDimArray();
         assertEquals(float.class, anArray.getDataType());
         assertArrayEquals(new int[]{3, 4}, anArray.getShape());
         assert(Arrays.equals(new float[]{1.0f, 2.0f, 3.0f, 4.0f, 
             5.0f, 6.0f, 7.0f, 8.0f, 
             10.0f, 11.0f, 12.0f, 13.0f},
                 (float[])anArray.data));
+    }
+
+    public Array createTwoDimArray() {
+        float[][] twoDFloat = new float[][]
+            {{ 1.0f,  2.0f,  3.0f,  4.0f},
+             { 5.0f,  6.0f,  7.0f,  8.0f},
+             {10.0f, 11.0f, 12.0f, 13.0f}};
+        Array anArray = new Array(twoDFloat);
+        return anArray;
     }
     
     @Test(expected=IllegalArgumentException.class)
@@ -155,11 +160,7 @@ public class ArrayTest {
     
     @Test
     public void rowIteratorOverTwoDimArrayOfFloat() {
-        float[][] twoDFloat = new float[][] 
-            {{1.0f, 2.0f, 3.0f, 4.0f},
-             {5.0f, 6.0f, 7.0f, 8.0f},
-             {10.0f, 11.0f, 12.0f, 13.0f}};
-        Array anArray = new Array(twoDFloat);
+        Array anArray = createTwoDimArray();
         Array secondRow = anArray.getSubArray(1);
         PrimitiveIterator.OfDouble itr = secondRow.iterator();
         assertTrue(itr.hasNext());
@@ -172,11 +173,7 @@ public class ArrayTest {
 
     @Test
     public void colIteratorOverTwoDimArrayOfFloat() {
-        float[][] twoDFloat = new float[][] 
-            {{1.0f, 2.0f, 3.0f, 4.0f},
-             {5.0f, 6.0f, 7.0f, 8.0f},
-             {10.0f, 11.0f, 12.0f, 13.0f}};
-        Array anArray = new Array(twoDFloat);
+        Array anArray = createTwoDimArray();
         Array secondCol = anArray.transpose().getSubArray(1);
         PrimitiveIterator.OfDouble itr = secondCol.iterator();
         assertTrue(itr.hasNext());
@@ -184,5 +181,39 @@ public class ArrayTest {
         assertEquals(6.0, itr.next(), 1e-18);
         assertEquals(11.0, itr.next(), 1e-18);
         assertFalse(itr.hasNext());
+    }
+    
+    @Test
+    public void testDotOfTwoRows() {
+        Array anArray = createTwoDimArray();
+        Array firstRow = anArray.getSubArray(0);
+        Array secondRow = anArray.getSubArray(1);
+        Array dotProd = firstRow.dot(secondRow);
+        assertEquals(new Array(70.0f), dotProd);
+    }
+    
+    @Test 
+    public void testDotOfTwoCols() {
+        Array anArray = createTwoDimArray().transpose();
+        Array dotProd = anArray.getSubArray(0).dot(anArray.getSubArray(1));
+        assertEquals(new Array(142.0f), dotProd);
+    }
+    
+    @Test
+    public void testOfMatrixMul() {
+        int[][] a = {{1, 2, 3, 4},
+            {5, 6, 7, 8}};
+        int[][] b = {{9, 10},
+            {11, 12},
+            {13, 14},
+            {15, 16}};
+        
+        int[][] c = {{130, 140},
+            {322, 348}};
+        
+        Array arrayA = new Array(a);
+        Array arrayB = new Array(b);
+        Array arrayC = new Array(c);
+        assertEquals(arrayC, arrayA.dot(arrayB));
     }
 }
