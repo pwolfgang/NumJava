@@ -32,7 +32,9 @@ public class ArrayTest {
 
     @Test
     public void constructSingleArrayOfInts() {
+        System.out.println("Single Array of Ints");
         Array anArray = new Array(new int[]{1, 2, 3, 4});
+        System.out.println(anArray);
         assertArrayEquals(new int[]{4}, anArray.getShape());
         assertEquals(int.class, anArray.getDataType());
         assertArrayEquals(new int[]{1, 2, 3, 4}, (int[])anArray.data);
@@ -41,7 +43,9 @@ public class ArrayTest {
     
     @Test
     public void constructTwoDimArrayOfFloat() {
+        System.out.println("Two Dim Array Of Float");
         Array anArray = createTwoDimArray();
+        System.out.println(anArray);
         assertEquals(float.class, anArray.getDataType());
         assertArrayEquals(new int[]{3, 4}, anArray.getShape());
         assert(Arrays.equals(new float[]{1.0f, 2.0f, 3.0f, 4.0f, 
@@ -71,6 +75,7 @@ public class ArrayTest {
     
     @Test
     public void contructFourDimArrayOfInt() {
+        System.out.println("Four Dim Array of Int");
         int [][][][] data = new int[][][][]
         {{{{1111, 1112, 1113, 1114},
            {1121, 1122, 1123, 1124}},
@@ -85,11 +90,14 @@ public class ArrayTest {
           {{2311, 2312, 2313, 2314},
            {2321, 2322, 2323, 2324}}}};
         Array anArray = new Array(data);
+        System.out.println(anArray);
         assertEquals(int.class, anArray.getDataType());
         assertArrayEquals(new int[]{2, 3, 2, 4}, anArray.getShape());
         assertEquals(1111, anArray.getInt(0, 0, 0, 0));
         assertEquals(2314, anArray.getInt(1, 2, 0, 3));
         Array subArray = anArray.getSubArray(1, 2);
+        System.out.println("Subarray(1,2)");
+        System.out.println(subArray);
         assertArrayEquals(new int[]{2, 4}, subArray.getShape());
         int k = 0;
         int[] expected = new int[]
@@ -108,7 +116,12 @@ public class ArrayTest {
         {{1, 2, 3, 4},
          {5, 6, 7, 8}};
         Array anArray = new Array(data);
+        System.out.println("Original array");
+        System.out.println(anArray);
         Array anArrayT = anArray.transpose();
+        System.out.println("Transpose");
+        String anArrayT_toString = anArrayT.toString();
+        System.out.println(anArrayT);
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 2; j++) {
                 assertEquals(data[j][i], anArrayT.getInt(i, j));
@@ -358,5 +371,20 @@ public class ArrayTest {
         {{{10, 13, 16, 19}, {6,  8, 10, 12}},{{29, 32, 35, 38}, {25, 26, 29, 31}}});
         assertEquals(c, a.add(b));
     }
+    
+    @Test
+    public void divByScalar() {
+        Array a = new Array(new int[]{1, 2, 3, 4});
+        Array b = new Array(2.0f);
+        Array c = new Array(new float[]{0.5f, 1.0f, 1.5f, 2.0f});
+        assertEquals(c, a.div(b));
+    }
          
+    @Test
+    public void arrayTimesArray() {
+        Array left = new Array(new float[]{1.0f, 2.0f, 3.0f, 4.0f});
+        Array right = new Array(new int[]{5, 6, 7, 8});
+        Array expected = new Array(new float[]{5.0f, 12.0f, 21.0f, 32.0f});
+        assertEquals(expected, left.mul(right));
+    }
 }

@@ -20,8 +20,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Objects;
 import java.util.PrimitiveIterator;
+import java.util.StringJoiner;
 import java.util.function.DoubleBinaryOperator;
 import java.util.function.IntBinaryOperator;
 
@@ -35,7 +35,7 @@ public class Array {
     private final int[] shape;
     final int[] stride;
     private final int numDim;
-    private final Class<?> dataType;
+    private Class<?> dataType;
     final int offset;
     Object data;
 
@@ -299,8 +299,16 @@ public class Array {
      * address a slice.
      */
     public Array getSubArray(int... idx) {
-        if (idx.length > numDim - 1) {
+        if (idx.length > numDim) {
             throw new IllegalArgumentException("Too many indices");
+        }
+        if (idx.length == numDim) {
+            int index = computeIndex(idx);
+            if (dataType == int.class) {
+                return new Array(((int[])data)[index]);
+            } else {
+                return new Array(((float[])data)[index]);
+            }
         }
         int[] idxPrime = new int[numDim];
         System.arraycopy(idx, 0, idxPrime, 0, idx.length);
@@ -359,52 +367,7 @@ public class Array {
      * @return A new Array with each element multiplied by the scalar value.
      */
     public Array mul(Number s) {
-        if (numDim == 0) {
-            return numProduct((Number) data, s);
-        } if (dataType == int.class) {
-            if (s instanceof Integer) {
-                return intTimesInt((int[]) data, s.intValue());
-            } else {
-                return intTimesFloat((int[]) data, s.floatValue());
-            }
-        } else {
-            return floatTimesFloat((float[]) data, s.floatValue());
-        }
-    }
-    
-    private static Array numProduct(Number x, Number y) {
-        if (x instanceof Integer && y instanceof Integer) {
-            return new Array(x.intValue() * y.intValue());
-        } else {
-            return new Array(x.floatValue() * y.floatValue());
-        }
-    }
-    
-    private static Array intTimesInt(int[] x, int s) {
-        int len = x.length;
-        int[] result = new int[len];
-        for (int i = 0; i < len; i++) {
-            result[i] = x[i] * s;
-        }
-        return new Array(result);
-    }
-
-    private static Array intTimesFloat(int[] x, float s) {
-        int len = x.length;
-        int[] result = new int[len];
-        for (int i = 0; i < len; i++) {
-            result[i] = (int)(x[i] * s);
-        }
-        return new Array(result);
-    }
-
-    private static Array floatTimesFloat(float[] x, float s) {
-        int len = x.length;
-        float[] result = new float[len];
-        for (int i = 0; i < len; i++) {
-            result[i] = x[i] * s;
-        }
-        return new Array(result);
+        return mul(new Array(s));
     }
     
     /**
@@ -558,11 +521,45 @@ public class Array {
         }
     }
     
-    @Override
-    public String toString() {
+    public String toStringDebug() {
+        String dataString;
+        if (numDim == 0) {
+            dataString = ((Number)data).toString();
+        } else if (dataType == int.class) {
+            dataString = Arrays.toString((int[])data);
+        } else {
+            dataString = Arrays.toString((float[])data);
+        }
         return String.format("Shape: %s%nStride: %s%nOffset: %s%nDataType: %s%nData: %s%n",
                 Arrays.toString(shape), Arrays.toString(stride), offset, 
-                dataType.toString(), Objects.toString(data));
+                dataType.toString(), dataString);
+    }
+
+    @Override
+    public String toString() {
+        if (numDim == 0) {
+            return ((Number)data).toString();
+        }
+        return toString(this);
+    }
+    
+    private String toString(Array a) {
+        if (a.numDim == 1) {
+            StringJoiner sj = new StringJoiner(", ", "{", "}");
+            int deltaIndex = a.stride[0];
+            for (int i = a.offset; i < a.offset + a.shape[0]*deltaIndex; i += deltaIndex) {
+                sj.add(java.lang.reflect.Array.get(a.data, i).toString());
+            }
+            return sj.toString();
+        } else {
+            int numRows = shape[0];
+            StringJoiner sj = new StringJoiner(", ", "{", "}");
+            for (int r = 0; r < numRows; r++) {
+                Array row = a.getSubArray(r);
+                sj.add(toString(row));
+            }
+            return sj.toString();
+        }
     }
     
     @Override
@@ -617,8 +614,15 @@ public class Array {
     
     private Array performIntOperation(Array other, IntBinaryOperator op) {
         Array result = copyOf(this);
+        if (result.numDim == 0 && other.numDim == 0) {
+            result.data = op.applyAsInt((Integer)result.data, (Integer)other.data);
+        }
         if (other.numDim == 0) {
-            performIntOperation((int[])result.data, ((Number)other.data).intValue(), op);
+            int[] left = (int[])result.data;
+            int right = other.getInt(0);
+            for (int i = 0; i < left.length; i++) {
+                left[i] = op.applyAsInt(left[i], right);
+        }
             return result;
         }
         if (result.numDim == other.numDim) {
@@ -653,13 +657,7 @@ public class Array {
         }
         return result;
     }
-    
-    private void performIntOperation(int[] left, int right, IntBinaryOperator op) {
-        for (int i = 0; i < left.length; i++) {
-            left[i] = op.applyAsInt(left[i], right);
-        }
-    }
-    
+       
     private void performIntOperation(Array left, Array right, IntBinaryOperator op) {
         IndexIterator itr1 = new IndexIterator(left.shape);
         IndexIterator itr2 = new IndexIterator(right.shape);
@@ -675,9 +673,87 @@ public class Array {
     }
     
     private Array performFloatOperation(Array other, DoubleBinaryOperator op) {
-        return null;
+        Array result = copyOf(this);
+        if (result.dataType != float.class) {
+            result.convertToFloat();
+        }
+        if (other.dataType != float.class) {
+            other = copyOf(other);
+            other.convertToFloat();
+        }
+        if (result.numDim == 0 && other.numDim == 0) {
+            result.data = (float)op.applyAsDouble((Float)result.data, (Float)other.data);
+            return result;
+        }
+        if (other.numDim == 0) {
+            float[] left = (float[])result.data;
+            float right = other.getFloat(0);
+            for (int i = 0; i < left.length; i++) {
+                left[i] = (float)op.applyAsDouble(left[i], right);
+        }
+            return result;
+        }
+        if (result.numDim == other.numDim) {
+            if (!Arrays.equals(result.shape, other.shape)) {
+                throw new IllegalArgumentException(
+                String.format("this shape: %s is not equal to other shape: %s", 
+                        Arrays.toString(this.shape), Arrays.toString(other.shape)));
+            }
+            performFloatOperation(result, other, op);
+            return result;
+        }
+        if (result.numDim < other.numDim) {
+                throw new IllegalArgumentException(
+                String.format("this shape: %s is not compatible with other shape: %s", 
+                        Arrays.toString(this.shape), Arrays.toString(other.shape)));            
+        }
+        int deltaDim = result.numDim - other.numDim;
+        int[] extraDims = new int[deltaDim];
+        System.arraycopy(result.shape, 0, extraDims, 0, deltaDim);
+        int[] matchingDims = new int[other.numDim];
+        System.arraycopy(result.shape, deltaDim, matchingDims, 0, other.numDim);
+        if (!Arrays.equals(matchingDims, other.shape)) {
+                throw new IllegalArgumentException(
+                String.format("this shape: %s is not compatible with other shape: %s", 
+                        Arrays.toString(this.shape), Arrays.toString(other.shape)));                        
+        }
+        IndexIterator itr = new IndexIterator(extraDims);
+        while (itr.hasNext()) {
+            int[] idx = itr.next();
+            Array subArray = result.getSubArray(idx);
+            performFloatOperation(subArray, other, op);
+        }
+        return result;
     }
     
+    private void performFloatOperation(Array left, Array right, DoubleBinaryOperator op) {
+        IndexIterator itr1 = new IndexIterator(left.shape);
+        IndexIterator itr2 = new IndexIterator(right.shape);
+        float[] leftData = (float[])left.data;
+        float[] rightData = (float[])right.data;
+        while (itr1.hasNext()) {
+            int[] idx1 = itr1.next();
+            int[] idx2 = itr2.next();
+            int index1 = left.computeIndex(idx1);
+            int index2 = right.computeIndex(idx2);
+            leftData[index1] = (float)op.applyAsDouble(leftData[index1], rightData[index2]);
+        }
+    }
+    
+    private void convertToFloat() {
+        dataType =float.class;
+        if (numDim == 0) {
+            data = ((Number)data).floatValue();
+        } else {
+            int[] dataAsInt = (int[])data;
+            float[] newData = new float[dataAsInt.length];
+            for (int i = 0; i < dataAsInt.length; i++) {
+                newData[i] = dataAsInt[i];
+            }
+            data = newData;
+        }   
+    }
+
     public Array sub(Array other) {
         if (this.dataType == int.class && other.dataType == int.class) {
             return performIntOperation(other, (int x, int y) -> x - y);
