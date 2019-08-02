@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.PrimitiveIterator;
+import java.util.function.DoubleBinaryOperator;
+import java.util.function.IntBinaryOperator;
 
 /**
  * This class is similar to the NumPY ndarray.
@@ -31,10 +33,10 @@ import java.util.PrimitiveIterator;
 public class Array {
 
     private final int[] shape;
-    private final int[] stride;
+    final int[] stride;
     private final int numDim;
     private final Class<?> dataType;
-    private final int offset;
+    final int offset;
     Object data;
 
     /**
@@ -63,7 +65,11 @@ public class Array {
         if (!dataClass.isArray()) {
             if (dataClass == Integer.class || dataClass == Float.class) {
                 this.data = data;
-                this.dataType = dataClass;
+                if (dataClass == Integer.class) {
+                    this.dataType = int.class;
+                } else {
+                    this.dataType = float.class;
+                }
                 shape = new int[0];
                 stride = new int[0];
                 offset = 0;
@@ -107,6 +113,39 @@ public class Array {
             offset = 0;
             copyData(data, 0);
         }
+    }
+    
+    /**
+     * Make a copy of an array. If the source array is a subArray or a transpose 
+     * the result will only contain the selected in row column order.
+     */
+    public static Array copyOf(Array source) {
+        if (source.numDim == 0) {
+            return new Array(source.data);
+        }
+        int sourceSize = 1;
+        for (int d : source.shape) {
+            sourceSize *= d;
+        }
+        if (sourceSize == java.lang.reflect.Array.getLength(source.data) 
+                && source.shape[source.numDim-1] == 1) {
+            Object copy = java.lang.reflect.Array.newInstance(source.dataType, sourceSize);
+            System.arraycopy(source.data, 0, copy, 0, sourceSize);
+            return new Array(source.shape, source.stride, source.dataType, source.offset, copy);
+        }
+        Object resultData = java.lang.reflect.Array.newInstance(source.dataType, sourceSize);
+        IndexIterator itr = new IndexIterator(source.shape);
+        for (int i = 0; i < sourceSize; i++) {
+            int[] idx = itr.next();
+            int index = source.computeIndex(idx);
+            java.lang.reflect.Array.set(resultData, i, java.lang.reflect.Array.get(source.data, index));
+        }
+        int[] newStride = new int[source.numDim];
+        newStride[source.numDim - 1] = 1;
+        for (int i = source.numDim - 2; i >= 0; i--) {
+            newStride[i] = newStride[i + 1] * source.shape[i + 1];
+        }
+        return new Array(source.shape, newStride, source.dataType, 0, resultData);
     }
 
     /**
@@ -222,14 +261,15 @@ public class Array {
         return this;
     }
 
-    /**
+   /**
      * Compute the linear offset into the internal data array.
      *
      * @param idx The index array
      * @return The index to the data array
      * @throws IllegalArgumentException if there are more indices than shapes.
      */
-    private int computeIndex(int[] idx) throws IllegalArgumentException {
+    private int computeIndex(int[] idx) 
+            throws IllegalArgumentException {
         if (idx.length > numDim) {
             throw new IllegalArgumentException("Too many indices: "
                     + Arrays.asList(idx).toString()
@@ -271,10 +311,6 @@ public class Array {
         for (int i = 0; i < deltaIndices; i++) {
             newShape[i] = shape[idx.length + i];
             newStride[i] = stride[idx.length + i];
-        }
-        int totalSize = 1;
-        for (int d : newShape) {
-            totalSize *= d;
         }
         return new Array(newShape, newStride, dataType, newOffset, data);
     }
@@ -579,6 +615,97 @@ public class Array {
             return true;
     }
     
+    private Array performIntOperation(Array other, IntBinaryOperator op) {
+        Array result = copyOf(this);
+        if (other.numDim == 0) {
+            performIntOperation((int[])result.data, ((Number)other.data).intValue(), op);
+            return result;
+        }
+        if (result.numDim == other.numDim) {
+            if (!Arrays.equals(result.shape, other.shape)) {
+                throw new IllegalArgumentException(
+                String.format("this shape: %s is not equal to other shape: %s", 
+                        Arrays.toString(this.shape), Arrays.toString(other.shape)));
+            }
+            performIntOperation(result, other, op);
+            return result;
+        }
+        if (result.numDim < other.numDim) {
+                throw new IllegalArgumentException(
+                String.format("this shape: %s is not compatible with other shape: %s", 
+                        Arrays.toString(this.shape), Arrays.toString(other.shape)));            
+        }
+        int deltaDim = result.numDim - other.numDim;
+        int[] extraDims = new int[deltaDim];
+        System.arraycopy(result.shape, 0, extraDims, 0, deltaDim);
+        int[] matchingDims = new int[other.numDim];
+        System.arraycopy(result.shape, deltaDim, matchingDims, 0, other.numDim);
+        if (!Arrays.equals(matchingDims, other.shape)) {
+                throw new IllegalArgumentException(
+                String.format("this shape: %s is not compatible with other shape: %s", 
+                        Arrays.toString(this.shape), Arrays.toString(other.shape)));                        
+        }
+        IndexIterator itr = new IndexIterator(extraDims);
+        while (itr.hasNext()) {
+            int[] idx = itr.next();
+            Array subArray = result.getSubArray(idx);
+            performIntOperation(subArray, other, op);
+        }
+        return result;
+    }
+    
+    private void performIntOperation(int[] left, int right, IntBinaryOperator op) {
+        for (int i = 0; i < left.length; i++) {
+            left[i] = op.applyAsInt(left[i], right);
+        }
+    }
+    
+    private void performIntOperation(Array left, Array right, IntBinaryOperator op) {
+        IndexIterator itr1 = new IndexIterator(left.shape);
+        IndexIterator itr2 = new IndexIterator(right.shape);
+        int[] leftData = (int[])left.data;
+        int[] rightData = (int[])right.data;
+        while (itr1.hasNext()) {
+            int[] idx1 = itr1.next();
+            int[] idx2 = itr2.next();
+            int index1 = left.computeIndex(idx1);
+            int index2 = right.computeIndex(idx2);
+            leftData[index1] = op.applyAsInt(leftData[index1], rightData[index2]);
+        }
+    }
+    
+    private Array performFloatOperation(Array other, DoubleBinaryOperator op) {
+        return null;
+    }
+    
+    public Array sub(Array other) {
+        if (this.dataType == int.class && other.dataType == int.class) {
+            return performIntOperation(other, (int x, int y) -> x - y);
+        } else {
+            return performFloatOperation(other, (double x, double y) -> x - y);
+        }
+    }
+    public Array add(Array other) {
+        if (this.dataType == int.class && other.dataType == int.class) {
+            return performIntOperation(other, (int x, int y) -> x + y);
+        } else {
+            return performFloatOperation(other, (double x, double y) -> x + y);
+        }
+    }
+    public Array mul(Array other) {
+        if (this.dataType == int.class && other.dataType == int.class) {
+            return performIntOperation(other, (int x, int y) -> x * y);
+        } else {
+            return performFloatOperation(other, (double x, double y) -> x * y);
+        }
+    }
+    public Array div(Array other) {
+        if (this.dataType == int.class && other.dataType == int.class) {
+            return performIntOperation(other, (int x, int y) -> x / y);
+        } else {
+            return performFloatOperation(other, (double x, double y) -> x / y);
+        }
+    }    
     
     /**
      * Return a PrimitiveIterator.OfDouble. If this is a

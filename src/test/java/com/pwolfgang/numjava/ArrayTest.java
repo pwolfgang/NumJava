@@ -145,7 +145,7 @@ public class ArrayTest {
     @Test
     public void constructSingleton() {
         Array anArray = new Array(10);
-        assertEquals(Integer.class, anArray.getDataType());
+        assertEquals(int.class, anArray.getDataType());
         assertEquals(10, anArray.getInt(0));
     }
     
@@ -314,4 +314,49 @@ public class ArrayTest {
         assertEquals(expected, result);
     }
     
+    @Test
+    public void testOfCopy() {
+        Array a = new Array(new int[][][]
+                {{{111, 112, 113}, {121, 122, 123}, {131, 132, 133}},
+                 {{211, 212, 213}, {221, 222, 223}, {231, 232, 233}},
+                 {{311, 312, 313}, {321, 322, 323}, {331, 332, 333}}});
+        Array colSlice = a.getSubArray(1).transpose().getSubArray(1);
+        System.out.println(colSlice);
+        System.out.println(Arrays.toString((int[])colSlice.data));
+        Array colSliceCopy = Array.copyOf(colSlice);
+        System.out.println(colSliceCopy);
+        System.out.println(Arrays.toString((int[])colSliceCopy.data));
+        Array expected = new Array(new int[]{212, 222, 232});
+        assertEquals(expected, colSliceCopy);
+        assertArrayEquals(new int[]{3}, colSliceCopy.getShape());
+        assertArrayEquals(new int[]{1}, colSliceCopy.stride);
+        assertEquals(0, colSliceCopy.offset);  
+    }
+    
+    @Test
+    public void arrayMinusSingleton() {
+        Array left = new Array(new int[]{1, 2, 3, 4});
+        Array right = new Array(2);
+        Array expected = new Array(new int[]{-1, 0, 1, 2});
+        assertEquals(expected, left.sub(right));
+    }
+    
+    @Test
+    public void arrayPlusArray() {
+        Array left = new Array(new int[]{1, 2, 3, 4});
+        Array right = new Array(new int[]{5, 6, 7, 8});
+        Array expected = new Array(new int[]{6, 8, 10, 12});
+        assertEquals(expected, left.add(right));
+    }
+    
+    @Test
+    public void nultiDimSubArray() {
+        Array a = new Array(new int [][][]
+        {{{1, 2, 3, 4}, {5, 6, 7, 8}}, {{20, 21, 22, 23}, {24, 24, 26, 27}}});
+        Array b = new Array(new int[][]{{9, 11, 13, 15},{1, 2, 3, 4}});
+        Array c = new Array(new int[][][]
+        {{{10, 13, 16, 19}, {6,  8, 10, 12}},{{29, 32, 35, 38}, {25, 26, 29, 31}}});
+        assertEquals(c, a.add(b));
+    }
+         
 }
