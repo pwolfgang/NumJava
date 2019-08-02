@@ -18,6 +18,8 @@ package com.pwolfgang.numjava;
 
 import java.util.Arrays;
 import java.util.PrimitiveIterator;
+import java.util.Random;
+import java.util.function.DoubleSupplier;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -386,5 +388,14 @@ public class ArrayTest {
         Array right = new Array(new int[]{5, 6, 7, 8});
         Array expected = new Array(new float[]{5.0f, 12.0f, 21.0f, 32.0f});
         assertEquals(expected, left.mul(right));
+    }
+    
+    @Test 
+    public void testRandom() {
+        System.out.println("Test Random");
+        Random rand = new Random(1);
+        DoubleSupplier supplier = () -> 2.0*rand.nextDouble() - 1.0;
+        Array anArray = Array.random(supplier, 2, 4);
+        System.out.println(anArray);
     }
 }

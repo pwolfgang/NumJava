@@ -23,6 +23,7 @@ import java.util.NoSuchElementException;
 import java.util.PrimitiveIterator;
 import java.util.StringJoiner;
 import java.util.function.DoubleBinaryOperator;
+import java.util.function.DoubleSupplier;
 import java.util.function.IntBinaryOperator;
 
 /**
@@ -112,6 +113,31 @@ public class Array {
             this.data = java.lang.reflect.Array.newInstance(dataType, totalSize);
             offset = 0;
             copyData(data, 0);
+        }
+    }
+    
+    public static Array random(DoubleSupplier supplier, int... shape) {
+        Object data = java.lang.reflect.Array.newInstance(float.class, shape);
+        IndexIterator itr = new IndexIterator(shape);
+        while (itr.hasNext()) {
+            int[] idx = itr.next();
+            setData(data, supplier, idx);
+        }
+        return new Array(data);
+    }
+    
+    private static void setData(Object data, DoubleSupplier supplier, int[] idx) {
+        if (idx.length == 1) {
+            java.lang.reflect.Array.setFloat(data, idx[0], (float)supplier.getAsDouble());
+        } else {
+            int firstIndex = idx[0];
+            int[] remainingIndicies = new int[idx.length - 1];
+            System.arraycopy(idx, 1, remainingIndicies, 0, idx.length-1);
+            int numRows = java.lang.reflect.Array.getLength(data);
+            for (int i = 0; i < numRows; i++) {
+                Object row = java.lang.reflect.Array.get(data, i);
+                setData(row, supplier, remainingIndicies);
+            }
         }
     }
     
