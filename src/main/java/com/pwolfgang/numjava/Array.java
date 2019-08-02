@@ -24,6 +24,7 @@ import java.util.PrimitiveIterator;
 import java.util.StringJoiner;
 import java.util.function.DoubleBinaryOperator;
 import java.util.function.DoubleSupplier;
+import java.util.function.DoubleUnaryOperator;
 import java.util.function.IntBinaryOperator;
 
 /**
@@ -116,7 +117,7 @@ public class Array {
         }
     }
     
-    public static Array random(DoubleSupplier supplier, int... shape) {
+    public static Array generate(DoubleSupplier supplier, int... shape) {
         Object data = java.lang.reflect.Array.newInstance(float.class, shape);
         IndexIterator itr = new IndexIterator(shape);
         while (itr.hasNext()) {
@@ -688,6 +689,27 @@ public class Array {
             int[] idx = itr.next();
             Array subArray = result.getSubArray(idx);
             performIntOperation(subArray, other, op);
+        }
+        return result;
+    }
+    
+    /**
+     * Returns a modified copy of this Array after applying the supplied operator
+     * to each value.
+     * @param op The operatior to be applied
+     * @return A modified Array
+     */
+    public Array apply(DoubleUnaryOperator op) {
+        Array result = copyOf(this);
+        if (result.dataType != float.class) {
+            result.convertToFloat();
+        }
+        IndexIterator itr = new IndexIterator(result.shape);
+        float[] floatData = (float[])result.data;
+        while (itr.hasNext()) {
+            int[] idx = itr.next();
+            int index = result.computeIndex(idx);
+            floatData[index] = (float)op.applyAsDouble(floatData[index]);
         }
         return result;
     }

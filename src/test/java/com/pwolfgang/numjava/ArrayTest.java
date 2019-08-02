@@ -391,11 +391,19 @@ public class ArrayTest {
     }
     
     @Test 
-    public void testRandom() {
+    public void testGenerate() {
         System.out.println("Test Random");
         Random rand = new Random(1);
         DoubleSupplier supplier = () -> 2.0*rand.nextDouble() - 1.0;
-        Array anArray = Array.random(supplier, 2, 4);
+        Array anArray = Array.generate(supplier, 2, 4);
         System.out.println(anArray);
+    }
+    
+    @Test
+    public void testApply() {
+        Array anArray = new Array(new int[][]{{1, 2, 3, 4},{5, 6, 7, 8}});
+        Array expected = new Array(new float[][]{{1.0f, 4.0f, 9.0f, 16.0f},{25.0f, 36.0f, 49.0f, 64.0f}});
+        Array result = anArray.apply((x) -> x*x);
+        assertEquals(expected, result);
     }
 }
