@@ -115,6 +115,14 @@ public class Array {
         }
     }
     
+    public int size() {
+        int s = 1;
+        for (int d : shape) {
+            s *= d;
+        }
+        return s;
+    }
+    
     /**
      * Make a copy of an array. If the source array is a subArray or a transpose 
      * the result will only contain the selected in row column order.
