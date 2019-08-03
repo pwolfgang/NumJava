@@ -65,6 +65,13 @@ public class ArrayTest {
         return anArray;
     }
     
+    @Test
+    public void testGetRow() {
+        Array anArray = createTwoDimArray();
+        Array expected = new Array(new float[][]{{5.0f,  6.0f,  7.0f,  8.0f}});
+        assertEquals(expected, anArray.getRow(1));
+    }
+    
     @Test(expected=IllegalArgumentException.class)
     public void constructArrayOfString() {
         Array anArray = new Array("The quick brown fox");
@@ -327,6 +334,14 @@ public class ArrayTest {
            {319736, 320732, 321728}}}});
         Array result = a.dot(a);
         assertEquals(expected, result);
+    }
+    
+    @Test
+    public void testOf3x1dot3x4() {
+        Array row = new Array(new int[]{1, 0, 1});
+        Array weights = new Array(new int[][]{{2, 3, 4, 5},{1, 2, 3, 4},{9, 8, 7,  6}});
+        Array expected = new Array(new int[]{11, 11, 11, 11});
+        assertEquals(expected, row.dot(weights));
     }
     
     @Test

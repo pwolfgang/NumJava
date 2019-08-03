@@ -34,9 +34,9 @@ import java.util.function.IntBinaryOperator;
  */
 public class Array {
 
-    private final int[] shape;
-    final int[] stride;
-    private final int numDim;
+    int[] shape;
+    int[] stride;
+    int numDim;
     private Class<?> dataType;
     final int offset;
     Object data;
@@ -357,6 +357,28 @@ public class Array {
         }
         return new Array(newShape, newStride, dataType, newOffset, data);
     }
+    
+    /**
+     * Get subArray as a single row.
+     */
+    public Array getRow(int... idx) {
+        Array subArray = getSubArray(idx);
+        int newNumDim = subArray.numDim+1;
+        int[] newShape = new int[newNumDim];
+        int[] newStride = new int[newNumDim];
+        System.arraycopy(subArray.shape, 0, newShape, 1, subArray.numDim);
+        System.arraycopy(subArray.stride, 0, newStride, 1, subArray.numDim);
+        newShape[0] = 1;
+        int newStride0 = 1;
+        for (int i = 1; i < newNumDim; i++) {
+            newStride0 *= newShape[i];
+        }
+        newStride[0] = newStride0;
+        subArray.stride = newStride;
+        subArray.shape = newShape;
+        subArray.numDim = newNumDim;
+        return subArray;
+    }
 
     /**
      * Return a transpose of this array.
@@ -469,7 +491,7 @@ public class Array {
         int aNumDim = a.numDim;
         int bNumDim = b.numDim;
         int aVlength = a.shape[aNumDim-1];
-        int bVlength = b.shape[bNumDim-1];
+        int bVlength = b.shape[bNumDim-2];
         if (aVlength != bVlength) {
             throw new IllegalArgumentException(
             String.format("shapes %s and %s not alligned",
