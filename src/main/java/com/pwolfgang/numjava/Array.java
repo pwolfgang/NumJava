@@ -42,13 +42,15 @@ public class Array {
     Object data;
 
     /**
-     * Create an Array object. This constructor is only to be used internally.
+     * Create an Array object. 
      *
      * @param shape The shape (a java array of ints.)
+     * @param stride The stride (a java array of ints.)
      * @param dataType The data type (primitive java class object)
+     * @param offset Start index in the data arrayl
      * @param data A single dimension array of data values.
      */
-    private Array(int[] shape, int[] stride, Class<?> dataType, int offset, Object data) {
+    public Array(int[] shape, int[] stride, Class<?> dataType, int offset, Object data) {
         this.shape = shape;
         this.numDim = shape.length;
         this.stride = stride;
@@ -360,6 +362,8 @@ public class Array {
     
     /**
      * Get subArray as a single row.
+     * @param idx The index of the row
+     * @return The selected subArray as a single row.
      */
     public Array getRow(int... idx) {
         Array subArray = getSubArray(idx);
@@ -378,6 +382,23 @@ public class Array {
         subArray.shape = newShape;
         subArray.numDim = newNumDim;
         return subArray;
+    }
+    
+    /**
+     * Get a range of rows. Creates an Array containing the selected rows
+     * as defined by the range of the first index.
+     * @param low The start index
+     * @param high One past the last index
+     * @return An Array view of the selected rows
+     */
+    public Array getRange(int low, int high) {
+        int[] idx = new int[numDim];
+        idx[0] = low;
+        int numRows = high - low;
+        int[] newShape = Arrays.copyOf(shape, numDim);
+        newShape[0] = numRows;
+        int newOffset = computeIndex(idx);
+        return new Array(newShape, stride, dataType, newOffset, data);
     }
 
     /**
@@ -405,7 +426,7 @@ public class Array {
      * @return a reshaped view.
      * @throws IllegalArgumentException if this is a transposed Array.
      */
-    public Array reShape(int[] newShape) {
+    public Array reShape(int... newShape) {
         if (stride[numDim - 1]!= 1) {
             throw new IllegalArgumentException("Cannot reshape a transposed array");            
         }

@@ -28,7 +28,7 @@ import static org.junit.Assert.*;
  * @author Paul
  */
 public class ArrayTest {
-    
+
     public ArrayTest() {
     }
 
@@ -39,10 +39,10 @@ public class ArrayTest {
         System.out.println(anArray);
         assertArrayEquals(new int[]{4}, anArray.getShape());
         assertEquals(int.class, anArray.getDataType());
-        assertArrayEquals(new int[]{1, 2, 3, 4}, (int[])anArray.data);
+        assertArrayEquals(new int[]{1, 2, 3, 4}, (int[]) anArray.data);
         assertEquals(1, anArray.getInt(0));
     }
-    
+
     @Test
     public void constructTwoDimArrayOfFloat() {
         System.out.println("Two Dim Array Of Float");
@@ -50,54 +50,41 @@ public class ArrayTest {
         System.out.println(anArray);
         assertEquals(float.class, anArray.getDataType());
         assertArrayEquals(new int[]{3, 4}, anArray.getShape());
-        assert(Arrays.equals(new float[]{1.0f, 2.0f, 3.0f, 4.0f, 
-            5.0f, 6.0f, 7.0f, 8.0f, 
+        assert (Arrays.equals(new float[]{1.0f, 2.0f, 3.0f, 4.0f,
+            5.0f, 6.0f, 7.0f, 8.0f,
             10.0f, 11.0f, 12.0f, 13.0f},
-                (float[])anArray.data));
+                (float[]) anArray.data));
     }
 
     public Array createTwoDimArray() {
-        float[][] twoDFloat = new float[][]
-            {{ 1.0f,  2.0f,  3.0f,  4.0f},
-             { 5.0f,  6.0f,  7.0f,  8.0f},
-             {10.0f, 11.0f, 12.0f, 13.0f}};
+        float[][] twoDFloat = new float[][]{{1.0f, 2.0f, 3.0f, 4.0f},
+        {5.0f, 6.0f, 7.0f, 8.0f},
+        {10.0f, 11.0f, 12.0f, 13.0f}};
         Array anArray = new Array(twoDFloat);
         return anArray;
     }
-    
+
     @Test
     public void testGetRow() {
         Array anArray = createTwoDimArray();
-        Array expected = new Array(new float[][]{{5.0f,  6.0f,  7.0f,  8.0f}});
+        Array expected = new Array(new float[][]{{5.0f, 6.0f, 7.0f, 8.0f}});
         assertEquals(expected, anArray.getRow(1));
     }
-    
-    @Test(expected=IllegalArgumentException.class)
+
+    @Test(expected = IllegalArgumentException.class)
     public void constructArrayOfString() {
         Array anArray = new Array("The quick brown fox");
     }
-    
-    @Test(expected=IllegalArgumentException.class)
+
+    @Test(expected = IllegalArgumentException.class)
     public void constructArrayOfStrings() {
         Array anArray = new Array(new String[]{"A", "B", "C"});
     }
-    
+
     @Test
     public void contructFourDimArrayOfInt() {
         System.out.println("Four Dim Array of Int");
-        int [][][][] data = new int[][][][]
-        {{{{1111, 1112, 1113, 1114},
-           {1121, 1122, 1123, 1124}},
-          {{1211, 1212, 1213, 1214},
-           {1221, 1222, 1223, 1223}},
-          {{1311, 1312, 1313, 1314},
-           {1321, 1322, 1323, 1324}}},
-         {{{2111, 2112, 2113, 2114},
-           {2121, 2122, 2124, 2124}},
-          {{2211, 2212, 2213, 2214},
-           {2221, 2222, 2223, 2224}},
-          {{2311, 2312, 2313, 2314},
-           {2321, 2322, 2323, 2324}}}};
+        int[][][][] data = construcr4dimArray();
         Array anArray = new Array(data);
         System.out.println(anArray);
         assertEquals(int.class, anArray.getDataType());
@@ -109,8 +96,7 @@ public class ArrayTest {
         System.out.println(subArray);
         assertArrayEquals(new int[]{2, 4}, subArray.getShape());
         int k = 0;
-        int[] expected = new int[]
-           {2311, 2312, 2313, 2314, 
+        int[] expected = new int[]{2311, 2312, 2313, 2314,
             2321, 2322, 2323, 2324};
         for (int i = 0; i < 2; i++) {
             for (int j = 0; j < 4; j++) {
@@ -118,12 +104,27 @@ public class ArrayTest {
             }
         }
     }
-    
+
+    public int[][][][] construcr4dimArray() {
+        int[][][][] data = new int[][][][]{{{{1111, 1112, 1113, 1114},
+        {1121, 1122, 1123, 1124}},
+        {{1211, 1212, 1213, 1214},
+        {1221, 1222, 1223, 1223}},
+        {{1311, 1312, 1313, 1314},
+        {1321, 1322, 1323, 1324}}},
+        {{{2111, 2112, 2113, 2114},
+        {2121, 2122, 2124, 2124}},
+        {{2211, 2212, 2213, 2214},
+        {2221, 2222, 2223, 2224}},
+        {{2311, 2312, 2313, 2314},
+        {2321, 2322, 2323, 2324}}}};
+        return data;
+    }
+
     @Test
     public void testTranspose() {
-        int[][] data = new int[][]
-        {{1, 2, 3, 4},
-         {5, 6, 7, 8}};
+        int[][] data = new int[][]{{1, 2, 3, 4},
+        {5, 6, 7, 8}};
         Array anArray = new Array(data);
         System.out.println("Original array");
         System.out.println(anArray);
@@ -137,24 +138,22 @@ public class ArrayTest {
             }
         }
     }
-    
+
     @Test
     public void reShape2dto1d() {
-        int[][] data = new int[][]
-        {{1, 2, 3, 4},
-         {5, 6, 7, 8}};
+        int[][] data = new int[][]{{1, 2, 3, 4},
+        {5, 6, 7, 8}};
         Array anArray = new Array(data);
         Array reShaped = anArray.reShape(new int[]{8});
         for (int i = 0; i < 8; i++) {
-            assertEquals(i+1, reShaped.getInt(i));
+            assertEquals(i + 1, reShaped.getInt(i));
         }
     }
 
     @Test
     public void reShape1dto2d() {
-        int[][] data = new int[][]
-        {{1, 2, 3, 4},
-         {5, 6, 7, 8}};
+        int[][] data = new int[][]{{1, 2, 3, 4},
+        {5, 6, 7, 8}};
         Array anArray = new Array(new int[]{1, 2, 3, 4, 5, 6, 7, 8});
         Array reShaped = anArray.reShape(new int[]{2, 4});
         for (int i = 0; i < 2; i++) {
@@ -163,14 +162,14 @@ public class ArrayTest {
             }
         }
     }
-    
+
     @Test
     public void constructSingleton() {
         Array anArray = new Array(10);
         assertEquals(int.class, anArray.getDataType());
         assertEquals(10, anArray.getInt(0));
     }
-    
+
     @Test
     public void iteratorOverSingleton() {
         Array anArray = new Array(10);
@@ -179,7 +178,7 @@ public class ArrayTest {
         assertEquals(10.0, itr.nextDouble(), 1e-18);
         assertFalse(itr.hasNext());
     }
-    
+
     @Test
     public void rowIteratorOverTwoDimArrayOfFloat() {
         Array anArray = createTwoDimArray();
@@ -204,7 +203,7 @@ public class ArrayTest {
         assertEquals(11.0, itr.next(), 1e-18);
         assertFalse(itr.hasNext());
     }
-    
+
     @Test
     public void testDotOfTwoRows() {
         Array anArray = createTwoDimArray();
@@ -213,26 +212,26 @@ public class ArrayTest {
         Array dotProd = firstRow.dot(secondRow);
         assertEquals(new Array(70.0f), dotProd);
     }
-    
-    @Test 
+
+    @Test
     public void testDotOfTwoCols() {
         Array anArray = createTwoDimArray().transpose();
         Array dotProd = anArray.getSubArray(0).dot(anArray.getSubArray(1));
         assertEquals(new Array(142.0f), dotProd);
     }
-    
+
     @Test
     public void testOfMatrixMul_2x4_by_4x2() {
         int[][] a = {{1, 2, 3, 4},
-            {5, 6, 7, 8}};
+        {5, 6, 7, 8}};
         int[][] b = {{9, 10},
-            {11, 12},
-            {13, 14},
-            {15, 16}};
-        
+        {11, 12},
+        {13, 14},
+        {15, 16}};
+
         int[][] c = {{130, 140},
-            {322, 348}};
-        
+        {322, 348}};
+
         Array arrayA = new Array(a);
         Array arrayB = new Array(b);
         Array arrayC = new Array(c);
@@ -242,11 +241,11 @@ public class ArrayTest {
     @Test
     public void testOfMatrixMul_2x4_by_4x1() {
         int[][] a = {{1, 2, 3, 4},
-            {5, 6, 7, 8}};
+        {5, 6, 7, 8}};
         int[][] b = {{9}, {11}, {13}, {15}};
-        
+
         int[][] c = {{130}, {322}};
-        
+
         Array arrayA = new Array(a);
         Array arrayB = new Array(b);
         Array arrayC = new Array(c);
@@ -257,21 +256,21 @@ public class ArrayTest {
     @Test
     public void testOfMatrixMul_2x4_by_one_dim_array() {
         int[][] a = {{1, 2, 3, 4},
-            {5, 6, 7, 8}};
+        {5, 6, 7, 8}};
         int[] b = {9, 11, 13, 15};
-        
+
         int[] c = {130, 322};
-        
+
         Array arrayA = new Array(a);
         Array arrayB = new Array(b);
         Array arrayC = new Array(c);
         Array result = arrayA.dot(arrayB);
         assertEquals(arrayC, result);
     }
-    
+
     @Test
     public void testOf2x2x4byOneDimArray() {
-        int [][][]a = {{{1, 2, 3, 4}, {5, 6, 7, 8}},{{20, 21, 22, 23}, {24, 24, 26, 27}}};
+        int[][][] a = {{{1, 2, 3, 4}, {5, 6, 7, 8}}, {{20, 21, 22, 23}, {24, 24, 26, 27}}};
         int[] b = {9, 11, 13, 15};
         int[][] c = {{130, 322}, {1042, 1223}};
         Array arrayA = new Array(a);
@@ -281,88 +280,75 @@ public class ArrayTest {
         assertEquals(arrayC, result);
 
     }
-    
+
     @Test
     public void testOfNdim_by_Mdim() {
-        Array a = new Array(new int[][][]
-                {{{111, 112, 113}, {121, 122, 123}, {131, 132, 133}},
-                 {{211, 212, 213}, {221, 222, 223}, {231, 232, 233}},
-                 {{311, 312, 313}, {321, 322, 323}, {331, 332, 333}}});
+        Array a = new Array(new int[][][]{{{111, 112, 113}, {121, 122, 123}, {131, 132, 133}},
+        {{211, 212, 213}, {221, 222, 223}, {231, 232, 233}},
+        {{311, 312, 313}, {321, 322, 323}, {331, 332, 333}}});
         Array rowSlice = a.getSubArray(1, 1);
         System.out.println(rowSlice);
-        System.out.println(Arrays.toString((int[])rowSlice.data));
+        System.out.println(Arrays.toString((int[]) rowSlice.data));
         Array colSlice = a.getSubArray(1).transpose().getSubArray(1);
         System.out.println(colSlice);
-        System.out.println(Arrays.toString((int[])colSlice.data));
-        Array expected = new Array(new int[][][][]
-        {{{{ 40676,  41012,  41348},
-           { 74276,  74612,  74948},
-           {107876, 108212, 108548}},
-
-          {{ 44306,  44672,  45038},
-           { 80906,  81272,  81638},
-           {117506, 117872, 118238}},
-
-          {{ 47936,  48332,  48728},
-           { 87536,  87932,  88328},
-           {127136, 127532, 127928}}},
-
-
-         {{{ 76976,  77612,  78248},
-           {140576, 141212, 141848},
-           {204176, 204812, 205448}},
-
-          {{ 80606,  81272,  81938},
-           {147206, 147872, 148538},
-           {213806, 214472, 215138}},
-
-          {{ 84236,  84932,  85628},
-           {153836, 154532, 155228},
-           {223436, 224132, 224828}}},
-
-
-         {{{113276, 114212, 115148},
-           {206876, 207812, 208748},
-           {300476, 301412, 302348}},
-
-          {{116906, 117872, 118838},
-           {213506, 214472, 215438},
-           {310106, 311072, 312038}},
-
-          {{120536, 121532, 122528},
-           {220136, 221132, 222128},
-           {319736, 320732, 321728}}}});
+        System.out.println(Arrays.toString((int[]) colSlice.data));
+        Array expected = new Array(new int[][][][]{{{{40676, 41012, 41348},
+        {74276, 74612, 74948},
+        {107876, 108212, 108548}},
+        {{44306, 44672, 45038},
+        {80906, 81272, 81638},
+        {117506, 117872, 118238}},
+        {{47936, 48332, 48728},
+        {87536, 87932, 88328},
+        {127136, 127532, 127928}}},
+        {{{76976, 77612, 78248},
+        {140576, 141212, 141848},
+        {204176, 204812, 205448}},
+        {{80606, 81272, 81938},
+        {147206, 147872, 148538},
+        {213806, 214472, 215138}},
+        {{84236, 84932, 85628},
+        {153836, 154532, 155228},
+        {223436, 224132, 224828}}},
+        {{{113276, 114212, 115148},
+        {206876, 207812, 208748},
+        {300476, 301412, 302348}},
+        {{116906, 117872, 118838},
+        {213506, 214472, 215438},
+        {310106, 311072, 312038}},
+        {{120536, 121532, 122528},
+        {220136, 221132, 222128},
+        {319736, 320732, 321728}}}});
         Array result = a.dot(a);
         assertEquals(expected, result);
     }
-    
+
     @Test
     public void testOf3x1dot3x4() {
         Array row = new Array(new int[]{1, 0, 1});
-        Array weights = new Array(new int[][]{{2, 3, 4, 5},{1, 2, 3, 4},{9, 8, 7,  6}});
+        Array weights = new Array(new int[][]{{2, 3, 4, 5}, {1, 2, 3, 4}, {9, 8, 7, 6}});
         Array expected = new Array(new int[]{11, 11, 11, 11});
         assertEquals(expected, row.dot(weights));
     }
-    
+
     @Test
     public void testOfCopy() {
-        Array a = new Array(new int[][][]
-                {{{111, 112, 113}, {121, 122, 123}, {131, 132, 133}},
-                 {{211, 212, 213}, {221, 222, 223}, {231, 232, 233}},
-                 {{311, 312, 313}, {321, 322, 323}, {331, 332, 333}}});
+        Array a = new Array(new int[][][]{{{111, 112, 113}, {121, 122, 123}, {131, 132, 133}},
+        {{211, 212, 213}, {221, 222, 223}, {231, 232, 233}},
+        {{311, 312, 313}, {321, 322, 323}, {331, 332, 333}}});
         Array colSlice = a.getSubArray(1).transpose().getSubArray(1);
         System.out.println(colSlice);
-        System.out.println(Arrays.toString((int[])colSlice.data));
+        System.out.println(Arrays.toString((int[]) colSlice.data));
         Array colSliceCopy = Array.copyOf(colSlice);
         System.out.println(colSliceCopy);
-        System.out.println(Arrays.toString((int[])colSliceCopy.data));
+        System.out.println(Arrays.toString((int[]) colSliceCopy.data));
         Array expected = new Array(new int[]{212, 222, 232});
         assertEquals(expected, colSliceCopy);
         assertArrayEquals(new int[]{3}, colSliceCopy.getShape());
         assertArrayEquals(new int[]{1}, colSliceCopy.stride);
-        assertEquals(0, colSliceCopy.offset);  
+        assertEquals(0, colSliceCopy.offset);
     }
-    
+
     @Test
     public void arrayMinusSingleton() {
         Array left = new Array(new int[]{1, 2, 3, 4});
@@ -370,7 +356,7 @@ public class ArrayTest {
         Array expected = new Array(new int[]{-1, 0, 1, 2});
         assertEquals(expected, left.sub(right));
     }
-    
+
     @Test
     public void arrayPlusArray() {
         Array left = new Array(new int[]{1, 2, 3, 4});
@@ -378,17 +364,15 @@ public class ArrayTest {
         Array expected = new Array(new int[]{6, 8, 10, 12});
         assertEquals(expected, left.add(right));
     }
-    
+
     @Test
     public void nultiDimSubArray() {
-        Array a = new Array(new int [][][]
-        {{{1, 2, 3, 4}, {5, 6, 7, 8}}, {{20, 21, 22, 23}, {24, 24, 26, 27}}});
-        Array b = new Array(new int[][]{{9, 11, 13, 15},{1, 2, 3, 4}});
-        Array c = new Array(new int[][][]
-        {{{10, 13, 16, 19}, {6,  8, 10, 12}},{{29, 32, 35, 38}, {25, 26, 29, 31}}});
+        Array a = new Array(new int[][][]{{{1, 2, 3, 4}, {5, 6, 7, 8}}, {{20, 21, 22, 23}, {24, 24, 26, 27}}});
+        Array b = new Array(new int[][]{{9, 11, 13, 15}, {1, 2, 3, 4}});
+        Array c = new Array(new int[][][]{{{10, 13, 16, 19}, {6, 8, 10, 12}}, {{29, 32, 35, 38}, {25, 26, 29, 31}}});
         assertEquals(c, a.add(b));
     }
-    
+
     @Test
     public void divByScalar() {
         Array a = new Array(new int[]{1, 2, 3, 4});
@@ -396,7 +380,7 @@ public class ArrayTest {
         Array c = new Array(new float[]{0.5f, 1.0f, 1.5f, 2.0f});
         assertEquals(c, a.div(b));
     }
-         
+
     @Test
     public void arrayTimesArray() {
         Array left = new Array(new float[]{1.0f, 2.0f, 3.0f, 4.0f});
@@ -404,21 +388,66 @@ public class ArrayTest {
         Array expected = new Array(new float[]{5.0f, 12.0f, 21.0f, 32.0f});
         assertEquals(expected, left.mul(right));
     }
-    
-    @Test 
+
+    @Test
     public void testGenerate() {
         System.out.println("Test Random");
         Random rand = new Random(1);
-        DoubleSupplier supplier = () -> 2.0*rand.nextDouble() - 1.0;
+        DoubleSupplier supplier = () -> 2.0 * rand.nextDouble() - 1.0;
         Array anArray = Array.generate(supplier, 2, 4);
         System.out.println(anArray);
     }
-    
+
     @Test
     public void testApply() {
-        Array anArray = new Array(new int[][]{{1, 2, 3, 4},{5, 6, 7, 8}});
-        Array expected = new Array(new float[][]{{1.0f, 4.0f, 9.0f, 16.0f},{25.0f, 36.0f, 49.0f, 64.0f}});
-        Array result = anArray.apply((x) -> x*x);
+        Array anArray = new Array(new int[][]{{1, 2, 3, 4}, {5, 6, 7, 8}});
+        Array expected = new Array(new float[][]{{1.0f, 4.0f, 9.0f, 16.0f}, {25.0f, 36.0f, 49.0f, 64.0f}});
+        Array result = anArray.apply((x) -> x * x);
         assertEquals(expected, result);
+    }
+
+    @Test
+    public void testGetRange() {
+        int[][][][] data = new int[][][][]
+        {{{{1111, 1112, 1113, 1114},
+        {1121, 1122, 1123, 1124},
+        {1131, 1132, 1133, 1134}},
+        {{1211, 1212, 1213, 1214},
+        {1221, 1222, 1223, 1224},
+        {1231, 1232, 1233, 1234}}},
+        {{{2111, 2112, 2113, 2114},
+        {2121, 2122, 2123, 2124},
+        {2131, 2132, 2133, 2134}},
+        {{2211, 2212, 2213, 2214},
+        {2221, 2222, 2223, 2224},
+        {2231, 2232, 2233, 2234}}},
+        {{{3111, 3112, 3113, 3114},
+        {3121, 3122, 3123, 3124},
+        {3131, 3132, 3133, 3134}},
+        {{3211, 3212, 3213, 3214},
+        {3221, 3222, 3223, 3224},
+        {3231, 3232, 3233, 3234}}},
+        {{{4111, 4112, 4113, 4114},
+        {4121, 4122, 4123, 4124},
+        {4131, 4132, 4133, 4134}},
+        {{4211, 4212, 4213, 4214},
+        {4221, 4222, 4223, 4224},
+        {4231, 4232, 4233, 4234}}}};
+        int[][][][] subData = new int[][][][]
+        {{{{2111, 2112, 2113, 2114},
+        {2121, 2122, 2123, 2124},
+        {2131, 2132, 2133, 2134}},
+        {{2211, 2212, 2213, 2214},
+        {2221, 2222, 2223, 2224},
+        {2231, 2232, 2233, 2234}}},
+        {{{3111, 3112, 3113, 3114},
+        {3121, 3122, 3123, 3124},
+        {3131, 3132, 3133, 3134}},
+        {{3211, 3212, 3213, 3214},
+        {3221, 3222, 3223, 3224},
+        {3231, 3232, 3233, 3234}}}};
+        Array anArray = new Array(data);
+        Array expected = new Array(subData);
+        Array result = anArray.getRange(1, 3);
     }
 }
