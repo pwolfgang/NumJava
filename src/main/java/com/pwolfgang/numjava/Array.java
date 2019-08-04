@@ -616,24 +616,88 @@ public class Array {
         return resultArray;    
     }
     
+//    private static Array innerProduct(Array left, Array right) {
+//        if (left.shape[0] != right.shape[0]) {
+//            throw new IllegalArgumentException("Arrays must be the same size");
+//        }
+//        double result = 0;
+//        PrimitiveIterator.OfDouble leftItr = left.iterator();
+//        PrimitiveIterator.OfDouble rightItr = right.iterator();
+//        while (leftItr.hasNext()) {
+//            double leftValue = leftItr.nextDouble();
+//            double rightValue = rightItr.nextDouble();
+//            result += leftValue * rightValue;
+//        }
+//        if (left.dataType == int.class && right.dataType == int.class) {
+//            return new Array((int)result);
+//        } else {
+//            return new Array((float)result);
+//        }
+//    }
+    
     private static Array innerProduct(Array left, Array right) {
         if (left.shape[0] != right.shape[0]) {
             throw new IllegalArgumentException("Arrays must be the same size");
         }
-        double result = 0;
-        PrimitiveIterator.OfDouble leftItr = left.iterator();
-        PrimitiveIterator.OfDouble rightItr = right.iterator();
-        while (leftItr.hasNext()) {
-            double leftValue = leftItr.nextDouble();
-            double rightValue = rightItr.nextDouble();
-            result += leftValue * rightValue;
+        int leftStride = left.stride[0];
+        int leftLastIndex = leftStride * left.shape[0] + left.offset;
+        int leftIndex = left.offset;
+        int rightStride = right.stride[0];
+        int rightLastIndex = rightStride * right.shape[0] + right.offset;
+        int rightIndex = right.offset;
+        if (left.dataType == int.class) {
+            if (right.dataType == int.class) {
+                return new Array(intXintInnerProduct(leftStride, leftLastIndex, leftIndex, 
+                    rightStride, rightIndex, (int[])left.data, (int[])right.data));
+            } else {
+                return new Array(intXfloatInnerProduct(leftStride, leftLastIndex, leftIndex, 
+                    rightStride, rightIndex, (int[])left.data, (float[])right.data));
+            }
+        } else if (left.dataType == float.class) {
+            if (right.dataType == float.class) {
+                return new Array(floatXfloatInnerProduct(leftStride, leftLastIndex, leftIndex, 
+                    rightStride, rightIndex, (float[])left.data, (float[])right.data));                
+            } else {
+                return new Array(intXfloatInnerProduct(rightStride, rightLastIndex, rightIndex, 
+                    leftStride, leftIndex, (int[])left.data, (float[])right.data));                
+            }
         }
-        if (left.dataType == int.class && right.dataType == int.class) {
-            return new Array((int)result);
-        } else {
-            return new Array((float)result);
-        }
+        throw new RuntimeException("Cannot Get Here");
     }
+    
+    private static int intXintInnerProduct(int leftStride, int leftLastIndex, int leftIndex,
+            int rightStride, int rightIndex, int[] leftData, int[] rightData) {
+        int result = 0;
+        while (leftIndex < leftLastIndex) {
+            result += leftData[leftIndex] * rightData[rightIndex];
+            leftIndex += leftStride;
+            rightIndex += rightStride;
+        }
+        return result;
+    }
+
+    private static float floatXfloatInnerProduct(int leftStride, int leftLastIndex, int leftIndex,
+            int rightStride, int rightIndex, float[] leftData, float[] rightData) {
+        double result = 0;
+        while (leftIndex < leftLastIndex) {
+            result += leftData[leftIndex] * rightData[rightIndex];
+            leftIndex += leftStride;
+            rightIndex += rightStride;
+        }
+        return (float)result;
+    }
+
+    private static float intXfloatInnerProduct(int leftStride, int leftLastIndex, int leftIndex,
+            int rightStride, int rightIndex, int[] leftData, float[] rightData) {
+        double result = 0;
+        while (leftIndex < leftLastIndex) {
+            result += leftData[leftIndex] * rightData[rightIndex];
+            leftIndex += leftStride;
+            rightIndex += rightStride;
+        }
+        return (float)result;
+    }
+    
     
     public String toStringDebug() {
         String dataString;
@@ -1038,6 +1102,7 @@ public class Array {
             return value;
         }
     }
+    
 }
     
 
