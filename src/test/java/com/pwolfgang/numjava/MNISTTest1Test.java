@@ -39,7 +39,7 @@ public class MNISTTest1Test {
             {0,1,0,0,0,0,0,0,0,0},
             {0,0,0,0,0,0,0,0,0,1}
         };
-        Array lables = ReadMNIST.readLables("..\\MNIST\\train-labels-idx1-ubyte");
+        Array lables = ReadMNIST.readLabels("..\\MNIST\\train-labels-idx1-ubyte");
         Array range = lables.getRange(0, 5);
         assertEquals(new Array(expected), range);
     }

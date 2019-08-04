@@ -275,6 +275,42 @@ public class Array {
     }
     
     /**
+     * Return the index of the maximum value within the flattened array.
+     * @return The index of the maximum value.
+     */
+    public int argMax() {
+        int start = offset;
+        int idx[] = Arrays.copyOf(shape, shape.length);
+        for (int i = 0; i < idx.length-1; i++) {
+            idx[i]--;
+        }
+        int end = computeIndex(idx);
+        if (dataType == int.class) {
+            int[] intData = (int[])data;
+            int maxIndex = 0;
+            int maxV = intData[0];
+            for (int i = start; i < end; i++) {
+                if (intData[i] > maxV) {
+                    maxV = intData[i];
+                    maxIndex = i;
+                }
+            }
+            return maxIndex - start;
+        } else {
+            float[] floatData = (float[])data;
+            int maxIndex = 0;
+            float maxV = floatData[0];
+            for (int i = start; i < end; i++) {
+                if (floatData[i] > maxV) {
+                    maxV = floatData[i];
+                    maxIndex = i;
+                }
+            }
+            return maxIndex - start;  
+        }
+    }
+    
+    /**
      * Store a value in the array.
      * 
      * @param x The value to be stored

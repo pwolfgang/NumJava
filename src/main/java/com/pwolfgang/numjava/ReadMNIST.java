@@ -40,7 +40,7 @@ public class ReadMNIST {
         }
     }
     
-    public static Array readLables(String fileName) {
+    public static Array readLabels(String fileName) {
         try (InputStream in = new BufferedInputStream(new FileInputStream(fileName))) {
             int magicNumber = readInt(in);
             if (magicNumber != 2049) {
