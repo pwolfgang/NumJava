@@ -319,7 +319,10 @@ public class ArrayTest {
         {{120536, 121532, 122528},
         {220136, 221132, 222128},
         {319736, 320732, 321728}}}});
+        long start = System.nanoTime();
         Array result = a.dot(a);
+        long end = System.nanoTime();
+        System.out.println("Delta time:" + (end-start));
         assertEquals(expected, result);
     }
 
