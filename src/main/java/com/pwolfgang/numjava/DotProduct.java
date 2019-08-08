@@ -40,38 +40,11 @@ public class DotProduct {
 
     public native static int intXintInnerProduct(int leftStride, int leftLastIndex, int leftIndex, 
             int rightStride, int rightIndex, int[] leftData, int[] rightData); 
-//    {
-//        int result = 0;
-//        while (leftIndex < leftLastIndex) {
-//            result += leftData[leftIndex] * rightData[rightIndex];
-//            leftIndex += leftStride;
-//            rightIndex += rightStride;
-//        }
-//        return result;
-//    }
 
     public native static float intXfloatInnerProduct(int leftStride, int leftLastIndex, 
             int leftIndex, int rightStride, int rightIndex, int[] leftData, float[] rightData); 
-//    {
-//        double result = 0;
-//        while (leftIndex < leftLastIndex) {
-//            result += leftData[leftIndex] * rightData[rightIndex];
-//            leftIndex += leftStride;
-//            rightIndex += rightStride;
-//        }
-//        return (float) result;
-//    }
 
     public native static float floatXfloatInnerProduct(int leftStride, int leftLastIndex, 
             int leftIndex, int rightStride, int rightIndex, float[] leftData, float[] rightData); 
-//    {
-//        double result = 0;
-//        while (leftIndex < leftLastIndex) {
-//            result += leftData[leftIndex] * rightData[rightIndex];
-//            leftIndex += leftStride;
-//            rightIndex += rightStride;
-//        }
-//        return (float) result;
-//    }
     
 }
