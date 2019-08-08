@@ -47,10 +47,10 @@ public class ReadMNIST {
                 throw new RuntimeException("Unrecognized magic number " + magicNumber);
             }
             int numItems = readInt(in);
-            int[][] data = new int[numItems][10];
+            float[][] data = new float[numItems][10];
             for (int i = 0; i < numItems; i++) {
                 int b = in.read();
-                data[i][b] = 1;
+                data[i][b] = 1.0f;
             }
             return new Array(data);
         } catch (IOException ioex) {
