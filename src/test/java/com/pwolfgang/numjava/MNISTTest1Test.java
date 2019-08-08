@@ -32,7 +32,7 @@ public class MNISTTest1Test {
     
     @Test
     public void testReadLabels() {
-        int[][] expected = new int[][]{
+        float[][] expected = new float[][]{
             {0,0,0,0,0,1,0,0,0,0},
             {1,0,0,0,0,0,0,0,0,0},
             {0,0,0,0,1,0,0,0,0,0},

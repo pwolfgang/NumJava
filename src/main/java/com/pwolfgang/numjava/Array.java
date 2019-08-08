@@ -659,7 +659,7 @@ public class Array {
                     rightStride, rightIndex, (float[])left.data, (float[])right.data));                
             } else {
                 return new Array(DotProduct.intXfloatInnerProduct(rightStride, rightLastIndex, rightIndex, 
-                    leftStride, leftIndex, (int[])left.data, (float[])right.data));                
+                    leftStride, leftIndex, (int[])right.data, (float[])left.data));                
             }
         }
         throw new RuntimeException("Cannot Get Here");
