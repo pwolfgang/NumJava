@@ -664,7 +664,7 @@ public class Array {
         }
         throw new RuntimeException("Cannot Get Here");
     }
-       
+    
     public String toStringDebug() {
         String dataString;
         if (numDim == 0) {
@@ -1070,5 +1070,3 @@ public class Array {
     }
     
 }
-    
-
