@@ -595,45 +595,68 @@ public class Array {
     
     
     static Array mmul(Array a, Array b) {
-        int[] resultShape = new int[2];
-        resultShape[0] = a.shape[0];
-        resultShape[1] = b.shape[1];
-        Object result;
+        int nRows = a.shape[0];
+        int nCols = b.shape[1];
+        int[] resultShape = new int[]{nRows, nCols};
+        int[] resultStride = new int[]{nCols, 1};
+        int innerCount = a.shape[1];
+        int aRowStride = a.stride[0];
+        int aColStride = a.stride[1];
+        int bRowStride = b.stride[0];
+        int bColStride = b.stride[1];
+        Object resultData = null;
+        Class<?> resultDataType = null;
         if (a.dataType == int.class && b.dataType == int.class) {
-            result = new int[resultShape[0]][resultShape[1]];
-        } else {
-            result = new float[resultShape[0]][resultShape[1]];
-        }
-        Array resultArray = new Array(result);
-        for (int i = 0; i < resultShape[0]; i++) {
-            for (int j = 0; j < resultShape[1]; j++) {
-                Array aRow = a.getSubArray(i);
-                Array bCol = b.transpose().getSubArray(j);
-                Array p = aRow.dot(bCol);
-                resultArray.set((Number)p.data, i, j);
+            resultDataType = int.class;
+            int[] result = new int[nRows * nCols];
+            int[] aData = (int[])a.data;
+            int[] bData = (int[])b.data;
+            int aRowIndex = 0;
+            for (int i = 0; i < nRows; i++) {
+                int bColIndex = 0;
+                for (int j = 0; j < nCols; j++) {
+                    int sum = 0;
+                    for (int k = 0; k < innerCount; k++) {
+                        //c[i][j] += a[i][k] * b[k][j]
+                        int aikIndex = a.offset + aRowIndex + k*aColStride;
+                        int bkjIndex = b.offset + k*bRowStride + bColIndex;
+                        sum += aData[aikIndex] * bData[bkjIndex];
+                    }
+                    bColIndex += bColStride;
+                    int cijIndex = i*nCols + j;
+                    result[cijIndex] = sum;
+                }
+                aRowIndex += aRowStride;
             }
+            resultData = result;
+        } else if (a.dataType == float.class && b.dataType == float.class) {
+            resultDataType = float.class;
+            float[] result = new float[nRows * nCols];
+            float[] aData = (float[])a.data;
+            float[] bData = (float[])b.data;
+            int aRowIndex = 0;
+            for (int i = 0; i < nRows; i++) {
+                int bColIndex = 0;
+                for (int j = 0; j < nCols; j++) {
+                    float sum = 0.0f;
+                    for (int k = 0; k < innerCount; k++) {
+                        //c[i][j] += a[i][k] * b[k][j]
+                        int aikIndex = a.offset + aRowIndex + k*aColStride;
+                        int bkjIndex = b.offset + k*bRowStride + bColIndex;
+                        sum += aData[aikIndex] * bData[bkjIndex];
+                    }
+                    bColIndex += bColStride;
+                    int cijIndex = i*nCols + j;
+                    result[cijIndex] = sum;
+                }
+                aRowIndex += aRowStride;
+            }
+            resultData = result;
+        } else {
+            throw new RuntimeException("mixed mmul not allowed");
         }
-        return resultArray;    
+        return new Array(resultShape, resultStride, resultDataType, 0, resultData);
     }
-    
-//    private static Array innerProduct(Array left, Array right) {
-//        if (left.shape[0] != right.shape[0]) {
-//            throw new IllegalArgumentException("Arrays must be the same size");
-//        }
-//        double result = 0;
-//        PrimitiveIterator.OfDouble leftItr = left.iterator();
-//        PrimitiveIterator.OfDouble rightItr = right.iterator();
-//        while (leftItr.hasNext()) {
-//            double leftValue = leftItr.nextDouble();
-//            double rightValue = rightItr.nextDouble();
-//            result += leftValue * rightValue;
-//        }
-//        if (left.dataType == int.class && right.dataType == int.class) {
-//            return new Array((int)result);
-//        } else {
-//            return new Array((float)result);
-//        }
-//    }
     
     private static Array innerProduct(Array left, Array right) {
         if (left.shape[0] != right.shape[0]) {
