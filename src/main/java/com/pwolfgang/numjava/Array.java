@@ -611,13 +611,13 @@ public class Array {
             int[] result = new int[nRows * nCols];
             int[] aData = (int[])a.data;
             int[] bData = (int[])b.data;
-            resultData = DotProduct.iXiMMUL(nRows, nCols, innerCount, a, aColStride, b, bRowStride, aData, bData, bColStride, result, aRowStride);
+            resultData = DotProduct.iXiMMUL(nRows, nCols, innerCount, a.offset, aColStride, b.offset, bRowStride, aData, bData, bColStride, result, aRowStride);
         } else if (a.dataType == float.class && b.dataType == float.class) {
             resultDataType = float.class;
             float[] result = new float[nRows * nCols];
             float[] aData = (float[])a.data;
             float[] bData = (float[])b.data;
-            resultData = DotProduct.fXfMMUL(nRows, nCols, innerCount, a, aColStride, b, bRowStride, aData, bData, bColStride, result, aRowStride);
+            resultData = DotProduct.fXfMMUL(nRows, nCols, innerCount, a.offset, aColStride, b.offset, bRowStride, aData, bData, bColStride, result, aRowStride);
         } else {
             throw new RuntimeException("mixed mmul not allowed");
         }
