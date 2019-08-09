@@ -47,8 +47,8 @@ public class DotProduct {
     public native static float floatXfloatInnerProduct(int leftStride, int leftLastIndex, 
             int leftIndex, int rightStride, int rightIndex, float[] leftData, float[] rightData); 
     
-    public native static Object iXiMMUL(int nRows, int nCols, int innerCount, int aOffset, int aColStride, int bOffset, int bRowStride, int[] aData, int[] bData, int bColStride, int[] result, int aRowStride);
+    public native static Object iXiMMUL(int nRows, int nCols, int innerCount, int aOffset, int aColStride, int bOffset, int bRowStride, int[] aData, int[] bData, int bColStride, int aRowStride);
 
-    public native static Object fXfMMUL(int nRows, int nCols, int innerCount, int aOffset, int aColStride, int bOffset, int bRowStride, float[] aData, float[] bData, int bColStride, float[] result, int aRowStride);
+    public native static Object fXfMMUL(int nRows, int nCols, int innerCount, int aOffset, int aColStride, int bOffset, int bRowStride, float[] aData, float[] bData, int bColStride, int aRowStride);
 
 }

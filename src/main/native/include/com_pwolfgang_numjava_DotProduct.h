@@ -37,7 +37,7 @@ JNIEXPORT jfloat JNICALL Java_com_pwolfgang_numjava_DotProduct_floatXfloatInnerP
  * Signature: (IIIIIII[I[II[II)Ljava/lang/Object;
  */
 JNIEXPORT jobject JNICALL Java_com_pwolfgang_numjava_DotProduct_iXiMMUL
-  (JNIEnv *, jclass, jint, jint, jint, jint, jint, jint, jint, jintArray, jintArray, jint, jintArray, jint);
+  (JNIEnv *, jclass, jint, jint, jint, jint, jint, jint, jint, jintArray, jintArray, jint, jint);
 
 /*
  * Class:     com_pwolfgang_numjava_DotProduct
@@ -45,7 +45,7 @@ JNIEXPORT jobject JNICALL Java_com_pwolfgang_numjava_DotProduct_iXiMMUL
  * Signature: (IIIIIII[F[FI[FI)Ljava/lang/Object;
  */
 JNIEXPORT jobject JNICALL Java_com_pwolfgang_numjava_DotProduct_fXfMMUL
-  (JNIEnv *, jclass, jint, jint, jint, jint, jint, jint, jint, jfloatArray, jfloatArray, jint, jfloatArray, jint);
+  (JNIEnv *, jclass, jint, jint, jint, jint, jint, jint, jint, jfloatArray, jfloatArray, jint, jint);
 
 #ifdef __cplusplus
 }
