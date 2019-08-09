@@ -16,6 +16,7 @@
  */
 package com.pwolfgang.numjava;
 
+import java.util.Arrays;
 import java.util.Random;
 import org.junit.Test;
 import org.junit.Before;
@@ -76,6 +77,23 @@ public class DotProductTest {
         float result = DotProduct.floatXfloatInnerProduct(1, 10000, 0, 1, 0, floatData, floatData);
         long end = System.nanoTime();
         System.out.println("Time for float x float :" + (end - start));
+    }
+    
+    @Test
+    public void testFXFMMUL() {
+        float[] aData = new float[784];
+        for (int i = 0; i < 784; i++) {
+            aData[i] = random.nextFloat();
+        }
+        float[] bData = new float[784 * 40];
+        for (int i = 0; i < 784*40; i++) {
+            bData[i] = random.nextFloat();
+        }
+        long start = System.nanoTime();
+        Object result = DotProduct.fXfMMUL(1, 40, 784, 0, 1, 0, 40, aData, bData, 1, 784);
+        long end = System.nanoTime();
+        System.out.println("Time for fXfMMUL: " + (end-start));
+        System.out.println(Arrays.toString((float[])result));
     }
     
 }
