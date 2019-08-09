@@ -59,11 +59,15 @@ public class DotProduct {
             int bColIndex = 0;
             for (int j = 0; j < nCols; j++) {
                 int sum = 0;
+                int bRowIndex = 0;
+                int aColIndex = 0;
                 for (int k = 0; k < innerCount; k++) {
                     //c[i][j] += a[i][k] * b[k][j]
-                    int aikIndex = aOffset + aRowIndex + k * aColStride;
-                    int bkjIndex = bOffset + k * bRowStride + bColIndex;
+                    int aikIndex = aOffset + aRowIndex + aColIndex;
+                    int bkjIndex = bOffset + bRowIndex + bColIndex;
                     sum += aData[aikIndex] * bData[bkjIndex];
+                    bRowIndex += bRowStride;
+                    aColIndex += aColStride;
                 }
                 bColIndex += bColStride;
                 int cijIndex = i * nCols + j;
@@ -82,11 +86,15 @@ public class DotProduct {
             int bColIndex = 0;
             for (int j = 0; j < nCols; j++) {
                 float sum = 0.0F;
+                int aColIndex = 0;
+                int bRowIndex = 0;
                 for (int k = 0; k < innerCount; k++) {
                     //c[i][j] += a[i][k] * b[k][j]
-                    int aikIndex = aOffset + aRowIndex + k * aColStride;
-                    int bkjIndex = bOffset + k * bRowStride + bColIndex;
+                    int aikIndex = aOffset + aRowIndex + aColIndex;
+                    int bkjIndex = bOffset + bRowIndex + bColIndex;
                     sum += aData[aikIndex] * bData[bkjIndex];
+                    bRowIndex += bRowStride;
+                    aColIndex += aColStride;
                 }
                 bColIndex += bColStride;
                 int cijIndex = i * nCols + j;
