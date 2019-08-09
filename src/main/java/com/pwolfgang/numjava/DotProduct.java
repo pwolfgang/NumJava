@@ -52,8 +52,9 @@ public class DotProduct {
         return result;
     }
 
-    public static Object iXiMMUL(int nRows, int nCols, int innerCount, int aOffset, int aColStride, int bOffset, int bRowStride, int[] aData, int[] bData, int bColStride, int[] result, int aRowStride) {
+    public static Object iXiMMUL(int nRows, int nCols, int innerCount, int aOffset, int aColStride, int bOffset, int bRowStride, int[] aData, int[] bData, int bColStride, int aRowStride) {
         Object resultData;
+        int[] result = new int[nRows * nCols];
         int aRowIndex = 0;
         int cijIndex = 0;
         for (int i = 0; i < nRows; i++) {
@@ -80,8 +81,9 @@ public class DotProduct {
         return resultData;
     }
 
-    public static Object fXfMMUL(int nRows, int nCols, int innerCount, int aOffset, int aColStride, int bOffset, int bRowStride, float[] aData, float[] bData, int bColStride, float[] result, int aRowStride) {
+    public static Object fXfMMUL(int nRows, int nCols, int innerCount, int aOffset, int aColStride, int bOffset, int bRowStride, float[] aData, float[] bData, int bColStride, int aRowStride) {
         Object resultData;
+        float[] result = new float[nRows * nCols];
         int aRowIndex = 0;
         int cijIndex = 0;
         for (int i = 0; i < nRows; i++) {
