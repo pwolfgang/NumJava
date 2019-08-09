@@ -72,5 +72,30 @@ JNIEXPORT jfloat JNICALL Java_com_pwolfgang_numjava_DotProduct_floatXfloatInnerP
     env->ReleaseFloatArrayElements(rightData, rightDataP, 0);
     env->ReleaseFloatArrayElements(leftData, leftDataP, 0);
     return result; 
+
+/*
+ * Class:     com_pwolfgang_numjava_DotProduct
+ * Method:    iXiMMUL
+ * Signature: (IIIIIII[I[II[II)Ljava/lang/Object;
+ */
+JNIEXPORT jobject JNICALL Java_com_pwolfgang_numjava_DotProduct_iXiMMUL
+  (JNIEnv *env, jclass, jint nRows, jint nCols, jint innerCount, jint aOffset, 
+        jint aColStride, jint bOffset, jint bRowStride, jintArray aData, 
+        jintArray bData, jint bColStride, jintArray result, jint aRowStride) {
+    return NULL;
+}
+
+/*
+ * Class:     com_pwolfgang_numjava_DotProduct
+ * Method:    fXfMMUL
+ * Signature: (IIIIIII[F[FI[FI)Ljava/lang/Object;
+ */
+JNIEXPORT jobject JNICALL Java_com_pwolfgang_numjava_DotProduct_fXfMMUL
+  (JNIEnv *env, jclass, jint nRows, jint nCols, jint innerCount, jint aOffset, 
+        jint aColStride, jint bOffset, jint bRowStride, jfloatArray aData, 
+        jfloatArray bData, jint bColStride, jfloatArray result, jint aRowStride) {
+    return NULL;
+}
+
 }
 
