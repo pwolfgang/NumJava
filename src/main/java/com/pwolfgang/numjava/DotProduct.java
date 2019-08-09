@@ -47,4 +47,61 @@ public class DotProduct {
     public native static float floatXfloatInnerProduct(int leftStride, int leftLastIndex, 
             int leftIndex, int rightStride, int rightIndex, float[] leftData, float[] rightData); 
     
+    public static Object iXiMMUL(int nRows, int nCols, int innerCount, int aOffset, int aColStride, int bOffset, int bRowStride, int[] aData, int[] bData, int bColStride, int[] result, int aRowStride) {
+        Object resultData;
+        int aRowIndex = 0;
+        int cijIndex = 0;
+        for (int i = 0; i < nRows; i++) {
+            int bColIndex = 0;
+            for (int j = 0; j < nCols; j++) {
+                int sum = 0;
+                int bRowIndex = 0;
+                int aColIndex = 0;
+                for (int k = 0; k < innerCount; k++) {
+                    //c[i][j] += a[i][k] * b[k][j]
+                    int aikIndex = aOffset + aRowIndex + aColIndex;
+                    int bkjIndex = bOffset + bRowIndex + bColIndex;
+                    sum += aData[aikIndex] * bData[bkjIndex];
+                    bRowIndex += bRowStride;
+                    aColIndex += aColStride;
+                }
+                bColIndex += bColStride;
+                result[cijIndex] = sum;
+                cijIndex++;
+            }
+            aRowIndex += aRowStride;
+        }
+        resultData = result;
+        return resultData;
+    }
+
+    public static Object fXfMMUL(int nRows, int nCols, int innerCount, int aOffset, int aColStride, int bOffset, int bRowStride, float[] aData, float[] bData, int bColStride, float[] result, int aRowStride) {
+        Object resultData;
+        int aRowIndex = 0;
+        int cijIndex = 0;
+        for (int i = 0; i < nRows; i++) {
+            int bColIndex = 0;
+            for (int j = 0; j < nCols; j++) {
+                float sum = 0.0F;
+                int aColIndex = 0;
+                int bRowIndex = 0;
+                for (int k = 0; k < innerCount; k++) {
+                    //c[i][j] += a[i][k] * b[k][j]
+                    int aikIndex = aOffset + aRowIndex + aColIndex;
+                    int bkjIndex = bOffset + bRowIndex + bColIndex;
+                    sum += aData[aikIndex] * bData[bkjIndex];
+                    bRowIndex += bRowStride;
+                    aColIndex += aColStride;
+                }
+                bColIndex += bColStride;
+                result[cijIndex] = sum;
+                cijIndex++;
+            }
+            aRowIndex += aRowStride;
+        }
+        resultData = result;
+        return resultData;
+    }
+
+
 }
