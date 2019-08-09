@@ -128,16 +128,14 @@ JNIEXPORT jobject JNICALL Java_com_pwolfgang_numjava_DotProduct_fXfMMUL
         jfloatArray bData, jint bColStride, jint aRowStride) {
     float* aDataP = env->GetFloatArrayElements(aData, NULL);
     float* bDataP = env->GetFloatArrayElements(bData, NULL);
-    aDataP += aOffset;
-    bDataP += bOffset;
     float* result = (float*)malloc(nRows * nCols * sizeof(float));
     int cijIndex = 0;
-    int aRowIndex = 0;
+    int aRowIndex = (int)aOffset;
     for (int i = 0; i < nRows; ++i) {
         int bColIndex = 0;
         for (int j = 0; j < nCols; ++j) {
             float sum = 0;
-            int bRowIndex = 0;
+            int bRowIndex = (int)bOffset;
             int aColIndex = 0;
             for (int k = 0; k < innerCount; ++k) {
                 int aikIndex = aRowIndex + aColIndex;
