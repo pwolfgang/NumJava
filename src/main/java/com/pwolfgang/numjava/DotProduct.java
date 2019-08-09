@@ -51,5 +51,51 @@ public class DotProduct {
         }
         return result;
     }
+
+    public static Object iXiMMUL(int nRows, int nCols, int innerCount, Array a, int aColStride, Array b, int bRowStride, int[] aData, int[] bData, int bColStride, int[] result, int aRowStride) {
+        Object resultData;
+        int aRowIndex = 0;
+        for (int i = 0; i < nRows; i++) {
+            int bColIndex = 0;
+            for (int j = 0; j < nCols; j++) {
+                int sum = 0;
+                for (int k = 0; k < innerCount; k++) {
+                    //c[i][j] += a[i][k] * b[k][j]
+                    int aikIndex = a.offset + aRowIndex + k * aColStride;
+                    int bkjIndex = b.offset + k * bRowStride + bColIndex;
+                    sum += aData[aikIndex] * bData[bkjIndex];
+                }
+                bColIndex += bColStride;
+                int cijIndex = i * nCols + j;
+                result[cijIndex] = sum;
+            }
+            aRowIndex += aRowStride;
+        }
+        resultData = result;
+        return resultData;
+    }
+
+    public static Object fXfMMUL(int nRows, int nCols, int innerCount, Array a, int aColStride, Array b, int bRowStride, float[] aData, float[] bData, int bColStride, float[] result, int aRowStride) {
+        Object resultData;
+        int aRowIndex = 0;
+        for (int i = 0; i < nRows; i++) {
+            int bColIndex = 0;
+            for (int j = 0; j < nCols; j++) {
+                float sum = 0.0F;
+                for (int k = 0; k < innerCount; k++) {
+                    //c[i][j] += a[i][k] * b[k][j]
+                    int aikIndex = a.offset + aRowIndex + k * aColStride;
+                    int bkjIndex = b.offset + k * bRowStride + bColIndex;
+                    sum += aData[aikIndex] * bData[bkjIndex];
+                }
+                bColIndex += bColStride;
+                int cijIndex = i * nCols + j;
+                result[cijIndex] = sum;
+            }
+            aRowIndex += aRowStride;
+        }
+        resultData = result;
+        return resultData;
+    }
     
 }

@@ -611,52 +611,19 @@ public class Array {
             int[] result = new int[nRows * nCols];
             int[] aData = (int[])a.data;
             int[] bData = (int[])b.data;
-            int aRowIndex = 0;
-            for (int i = 0; i < nRows; i++) {
-                int bColIndex = 0;
-                for (int j = 0; j < nCols; j++) {
-                    int sum = 0;
-                    for (int k = 0; k < innerCount; k++) {
-                        //c[i][j] += a[i][k] * b[k][j]
-                        int aikIndex = a.offset + aRowIndex + k*aColStride;
-                        int bkjIndex = b.offset + k*bRowStride + bColIndex;
-                        sum += aData[aikIndex] * bData[bkjIndex];
-                    }
-                    bColIndex += bColStride;
-                    int cijIndex = i*nCols + j;
-                    result[cijIndex] = sum;
-                }
-                aRowIndex += aRowStride;
-            }
-            resultData = result;
+            resultData = DotProduct.iXiMMUL(nRows, nCols, innerCount, a, aColStride, b, bRowStride, aData, bData, bColStride, result, aRowStride);
         } else if (a.dataType == float.class && b.dataType == float.class) {
             resultDataType = float.class;
             float[] result = new float[nRows * nCols];
             float[] aData = (float[])a.data;
             float[] bData = (float[])b.data;
-            int aRowIndex = 0;
-            for (int i = 0; i < nRows; i++) {
-                int bColIndex = 0;
-                for (int j = 0; j < nCols; j++) {
-                    float sum = 0.0f;
-                    for (int k = 0; k < innerCount; k++) {
-                        //c[i][j] += a[i][k] * b[k][j]
-                        int aikIndex = a.offset + aRowIndex + k*aColStride;
-                        int bkjIndex = b.offset + k*bRowStride + bColIndex;
-                        sum += aData[aikIndex] * bData[bkjIndex];
-                    }
-                    bColIndex += bColStride;
-                    int cijIndex = i*nCols + j;
-                    result[cijIndex] = sum;
-                }
-                aRowIndex += aRowStride;
-            }
-            resultData = result;
+            resultData = DotProduct.fXfMMUL(nRows, nCols, innerCount, a, aColStride, b, bRowStride, aData, bData, bColStride, result, aRowStride);
         } else {
             throw new RuntimeException("mixed mmul not allowed");
         }
         return new Array(resultShape, resultStride, resultDataType, 0, resultData);
     }
+
     
     private static Array innerProduct(Array left, Array right) {
         if (left.shape[0] != right.shape[0]) {
