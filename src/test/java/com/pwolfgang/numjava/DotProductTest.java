@@ -38,9 +38,14 @@ public class DotProductTest {
     public void testFXfMMUL() {
         doTest(100);
         doTest(100);
-        for (int i = 100; i < 1700; i *= 1.4142135624) {
-            long time = doTest(i);
-            System.out.printf("%6d %10.3f%n", i, time/1e9);
+        int n = 100;
+        double fN = 100.0;
+        for (int i = 0; i < 9; i++) {
+            long time1 = doTest(n);
+            long time2 = doTest2(n);
+            System.out.printf("%6d %10.3f %10.3f%n", n, time1/1e9, time2/1e9);
+            fN *= Math.sqrt(2.0);
+            n = (int)Math.round(fN);
         }
         
     }
@@ -57,4 +62,15 @@ public class DotProductTest {
         return end-start;
     }
     
+    public long doTest2(int n) {
+        float[] data = new float[n * n];
+        for (int i = 0; i < n*n; i++) {
+            data[i] = random.nextFloat();
+        }
+        Array dataArray = new Array(new int[]{n, n}, new int[]{n, 1}, float.class, 0, data);
+        long start = System.nanoTime();
+        dataArray.dot(dataArray.transpose());
+        long end = System.nanoTime();
+        return end-start;
+    }
 }
